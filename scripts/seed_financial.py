@@ -75,8 +75,8 @@ def seed():
         db.commit()
 
         # ---------- Credit Cards ----------
-        cc1 = card_models.CreditCard(name="Cartão Platinum", issuer="Black Bank", last_four="4821", limit=Decimal("25000.00"), closing_day=22, due_day=30, color="#000000", active=True)
-        cc2 = card_models.CreditCard(name="Cartão Gold", issuer="Neon", last_four="1092", limit=Decimal("8000.00"), closing_day=18, due_day=26, color="#FFD700", active=True)
+        cc1 = card_models.CreditCard(name="Cartão Platinum", issuer="Black Bank", last_four="4821", limit=Decimal("25000.00"), closing_day=22, due_day=30, active=True)
+        cc2 = card_models.CreditCard(name="Cartão Gold", issuer="Neon", last_four="1092", limit=Decimal("8000.00"), closing_day=18, due_day=26, active=True)
         db.add_all([cc1, cc2])
         db.commit()
 

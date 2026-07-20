@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.core.exceptions import AppException
 
+from app.core.exceptions import AppException
 from app.modules.credit_cards import models, repository, schemas
 
 
@@ -21,9 +21,18 @@ class CreditCardService:
             raise AppException("Credit card not found")
         return c
 
-    def list(self, page: int = 1, page_size: int = 20, active: bool | None = None, sort: str = "id", order: str = "asc"):
+    def list(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        active: bool | None = None,
+        sort: str = "id",
+        order: str = "asc",
+    ):
         skip = (page - 1) * page_size
-        items, total = self.repo.list(skip=skip, limit=page_size, active=active, sort=sort, order=order)
+        items, total = self.repo.list(
+            skip=skip, limit=page_size, active=active, sort=sort, order=order
+        )
         return items, total
 
     def update(self, card_id: int, payload: schemas.CreditCardUpdate) -> models.CreditCard:

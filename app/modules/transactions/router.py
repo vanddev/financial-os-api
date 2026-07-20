@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.modules.transactions import schemas, service
 from app.modules.transactions.dto import TransactionDTO
 from app.shared.pagination.paginator import PageResponse
 from app.shared.responses.api import SuccessResponse
-from app.modules.transactions import service, schemas
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -43,7 +43,7 @@ def list_transactions(
     return {"success": True, "data": {"items": items, "page": page, "page_size": page_size, "total": total}}
 
 
-@router.post("/", response_model=SuccessResponse)
+@router.post("/", response_model=SuccessResponse[TransactionDTO])
 def create_transaction(payload: schemas.TransactionCreate, db: Session = Depends(get_db)):
     svc = service.TransactionService(db)
     t = svc.create(payload)
@@ -57,7 +57,7 @@ def get_transaction(tx_id: int, db: Session = Depends(get_db)):
     return {"success": True, "data": t}
 
 
-@router.put("/{tx_id}", response_model=SuccessResponse)
+@router.put("/{tx_id}", response_model=SuccessResponse[TransactionDTO])
 def update_transaction(tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db)):
     svc = service.TransactionService(db)
     t = svc.update(tx_id, payload)

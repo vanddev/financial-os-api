@@ -1,4 +1,3 @@
-from typing import List as _List
 from sqlalchemy.orm import Session
 
 from app.modules.credit_cards import models
@@ -11,7 +10,14 @@ class CreditCardRepository:
     def get(self, card_id: int) -> models.CreditCard | None:
         return self.db.query(models.CreditCard).filter(models.CreditCard.id == card_id).first()
 
-    def list(self, skip: int = 0, limit: int = 20, active: bool | None = None, sort: str = "id", order: str = "asc") -> tuple[_List[models.CreditCard], int]:
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 20,
+        active: bool | None = None,
+        sort: str = "id",
+        order: str = "asc",
+    ) -> tuple[list[models.CreditCard], int]:
         q = self.db.query(models.CreditCard)
         if active is not None:
             q = q.filter(models.CreditCard.active == active)

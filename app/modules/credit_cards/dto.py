@@ -11,7 +11,6 @@ class CreditCardDTO(BaseModel):
     limit: float
     closing_day: int
     due_day: int
-    color: str
     active: bool
     current_bill: float | None = 0.0
     available: float | None = 0.0

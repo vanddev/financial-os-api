@@ -11,7 +11,6 @@ class CreditCardBase(BaseModel):
     limit: Decimal = Decimal("0.00")
     closing_day: int | None = None
     due_day: int | None = None
-    color: str | None = None
     active: bool = True
 
 
@@ -26,7 +25,6 @@ class CreditCardUpdate(BaseModel):
     limit: Decimal | None = None
     closing_day: int | None = None
     due_day: int | None = None
-    color: str | None = None
     active: bool | None = None
 
 
