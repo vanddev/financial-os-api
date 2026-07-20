@@ -1,17 +1,21 @@
 from datetime import datetime
-from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-class AccountDTO(BaseModel):
+
+class CreditCardDTO(BaseModel):
     id: int
     name: str
-    institution: str
-    type: str
-    current_balance: Decimal
-    initial_balance: Decimal
+    issuer: str
+    last_four: str
+    limit: float
+    closing_day: int
+    due_day: int
     color: str
-    is_active: bool
+    active: bool
+    current_bill: float | None = 0.0
+    available: float | None = 0.0
+    utilization: float | None = 0.0
     created_at: datetime
     updated_at: datetime
 

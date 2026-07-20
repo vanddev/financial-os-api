@@ -1,19 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from app.shared.responses.api import SuccessResponse
+from app.core.database import get_db
 from app.modules.dashboard.router import get_dashboard_summary
-from app.core.database import SessionLocal
+from app.modules.dashboard.schemas import DashboardSummary
+from app.shared.responses.api import SuccessResponse
 
 router = APIRouter(prefix="/kpis", tags=["kpis"])
 
 
-@router.get("/", response_model=SuccessResponse)
-def list_kpis():
+@router.get("/", response_model=SuccessResponse[DashboardSummary])
+def list_kpis(db: Session = Depends(get_db)):
     """Backward-compatible mapping: /kpis -> /dashboard/summary
     Open a DB session and call dashboard.get_dashboard_summary with it."""
-    db = SessionLocal()
-    try:
-        return get_dashboard_summary(db=db)
-    finally:
-        db.close()
-
+    return get_dashboard_summary(db=db)
