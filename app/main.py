@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 
 from app.core.config import settings
-from app.core.exceptions import (
-    AppException,
-    app_exception_handler,
-    general_exception_handler,
-)
+from app.core.exceptions import register_exception_handlers
 from app.core.lifespan import lifespan
 from app.modules.accounts import router as accounts_router
 from app.modules.ai import router as ai_router
@@ -25,19 +21,20 @@ from app.modules.settings import router as settings_router
 from app.modules.subscriptions import router as subscriptions_router
 from app.modules.transactions import router as transactions_router
 from app.shared.middleware import LoggingMiddleware, setup_cors
+from app.shared.responses import ERROR_RESPONSES
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Personal Finance Platform",
     version=settings.APP_VERSION,
     lifespan=lifespan,
+    responses=ERROR_RESPONSES,
 )
 
 setup_cors(app)
 app.add_middleware(LoggingMiddleware)
 
-app.add_exception_handler(AppException, app_exception_handler)  # type: ignore[arg-type]
-app.add_exception_handler(Exception, general_exception_handler)
+register_exception_handlers(app)
 
 app.include_router(health_router)
 app.include_router(accounts_router)

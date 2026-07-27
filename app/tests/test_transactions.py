@@ -32,9 +32,7 @@ def test_transactions_crud(db_session):
         )
     )
     cat_svc = cat_service.CategoryService(db_session)
-    cat = cat_svc.create(
-        cat_schemas.CategoryCreate(name="TxCat", color="#111", icon="i", type="expense")
-    )
+    cat = cat_svc.create(cat_schemas.CategoryCreate(name="TxCat", icon="i", type="expense"))
     txs = tx_service.TransactionService(db_session)
     payload = tx_schemas.TransactionCreate(
         account_id=acc.id,
@@ -79,7 +77,6 @@ def test_create_transaction_serializes_orm_model(db_session):
     category = cat_service.CategoryService(db_session).create(
         cat_schemas.CategoryCreate(
             name="API TxCat",
-            color="#111",
             icon="i",
             type="expense",
         )
@@ -125,7 +122,6 @@ def test_list_transactions_filters_by_transaction_type(db_session):
     category = cat_service.CategoryService(db_session).create(
         cat_schemas.CategoryCreate(
             name="Filtered TxCat",
-            color="#111",
             icon="i",
             type="expense",
         )
@@ -170,7 +166,6 @@ def test_create_transaction_is_idempotent(db_session):
     category = cat_service.CategoryService(db_session).create(
         cat_schemas.CategoryCreate(
             name="Idempotent TxCat",
-            color="#111",
             icon="i",
             type="expense",
         )
@@ -211,7 +206,6 @@ def test_create_transaction_rejects_reused_key_with_different_payload(
     category = cat_service.CategoryService(db_session).create(
         cat_schemas.CategoryCreate(
             name="Conflict TxCat",
-            color="#111",
             icon="i",
             type="expense",
         )
@@ -262,7 +256,6 @@ def test_create_credit_card_transaction_without_account(db_session):
     category = cat_service.CategoryService(db_session).create(
         cat_schemas.CategoryCreate(
             name="Card Purchase",
-            color="#111",
             icon="i",
             type="expense",
         )

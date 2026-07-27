@@ -34,7 +34,6 @@ class DashboardCashflowTrendItem(BaseModel):
 class DashboardExpenseBreakdownItem(BaseModel):
     name: str
     value: float
-    color: str
 
 
 class DashboardCashflowCalendarItem(BaseModel):

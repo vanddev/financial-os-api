@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.core.exceptions import AppException
 
+from app.core.exceptions import AppException
 from app.modules.categories import models, repository, schemas
 
 
@@ -10,9 +10,7 @@ class CategoryService:
         self.repo = repository.CategoryRepository(db)
 
     def create(self, payload: schemas.CategoryCreate) -> models.Category:
-        cat = models.Category(
-            name=payload.name, color=payload.color, icon=payload.icon, type=payload.type
-        )
+        cat = models.Category(name=payload.name, icon=payload.icon, type=payload.type)
         if payload.subcategories:
             cat.subcategories = [models.Subcategory(name=s.name) for s in payload.subcategories]
         return self.repo.create(cat)
@@ -31,7 +29,6 @@ class CategoryService:
     def update(self, category_id: int, payload: schemas.CategoryUpdate) -> models.Category:
         c = self.get(category_id)
         c.name = payload.name
-        c.color = payload.color
         c.icon = payload.icon
         c.type = payload.type
         return self.repo.update(c)

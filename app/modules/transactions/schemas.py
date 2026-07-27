@@ -8,10 +8,19 @@ from app.shared.domain_enums import CashFlowType, PaymentMethod, TransactionStat
 
 
 class TransactionBase(BaseModel):
-    account_id: int | None = None
+    account_id: int | None = Field(
+        default=None,
+        description=(
+            "Required only for debit_card, pix, bank_transfer and "
+            "automatic_debit payment methods."
+        ),
+    )
     category_id: int
     subcategory_id: int | None = None
-    credit_card_id: int | None = None
+    credit_card_id: int | None = Field(
+        default=None,
+        description="Required only when payment_method is credit_card.",
+    )
     description: str | None = None
     amount: Decimal = Field(gt=0)
     transaction_type: CashFlowType

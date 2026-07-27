@@ -22,7 +22,6 @@ class SubcategoryOut(SubcategoryBase):
 
 class CategoryBase(BaseModel):
     name: str
-    color: str | None = None
     icon: str | None = None
     type: CashFlowType
 
@@ -33,7 +32,6 @@ class CategoryCreate(CategoryBase):
 
 class CategoryUpdate(BaseModel):
     name: str | None = None
-    color: str | None = None
     icon: str | None = None
     type: CashFlowType | None = None
 

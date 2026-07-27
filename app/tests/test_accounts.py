@@ -1,17 +1,21 @@
 from decimal import Decimal
 
-from app.modules.accounts import service, schemas
+from app.modules.accounts import schemas, service
 
 
 def test_account_crud(db_session):
     svc = service.AccountService(db_session)
-    payload = schemas.AccountCreate(name="Test Account", institution="Bank", type="checking", initial_balance=Decimal("100.00"))
+    payload = schemas.AccountCreate(
+        name="Test Account", institution="Bank", type="checking", initial_balance=Decimal("100.00")
+    )
     acc = svc.create(payload)
     assert acc.id is not None
     got = svc.get(acc.id)
     assert got.name == "Test Account"
     # update
-    upd = schemas.AccountUpdate(name="Updated", institution="Bank", type="checking", is_active=False)
+    upd = schemas.AccountUpdate(
+        name="Updated", institution="Bank", type="checking", is_active=False
+    )
     svc.update(acc.id, upd)
     got2 = svc.get(acc.id)
     assert got2.name == "Updated"

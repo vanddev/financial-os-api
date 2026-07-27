@@ -34,15 +34,6 @@ def get_investments_allocation(db: Session = Depends(get_db)):
         total_portfolio_value += val
 
     allocation = []
-    # Palette colors for chart
-    colors = {
-        "stock": "var(--chart-1)",
-        "etf": "var(--chart-2)",
-        "treasury_bond": "var(--chart-3)",
-        "cryptocurrency": "var(--chart-4)",
-        "fund": "var(--chart-5)",
-    }
-
     if total_portfolio_value > 0:
         for asset_type, val in totals_by_type.items():
             pct = (val / total_portfolio_value) * 100
@@ -50,17 +41,16 @@ def get_investments_allocation(db: Session = Depends(get_db)):
                 {
                     "name": asset_type,
                     "value": round(float(pct), 1),
-                    "color": colors.get(asset_type, "var(--chart-4)"),
                 }
             )
     else:
         # Default mock if empty
         allocation = [
-            {"name": "stock", "value": 42, "color": "var(--chart-1)"},
-            {"name": "etf", "value": 24, "color": "var(--chart-2)"},
-            {"name": "treasury_bond", "value": 18, "color": "var(--chart-3)"},
-            {"name": "cryptocurrency", "value": 9, "color": "var(--chart-4)"},
-            {"name": "fund", "value": 7, "color": "var(--chart-5)"},
+            {"name": "stock", "value": 42},
+            {"name": "etf", "value": 24},
+            {"name": "treasury_bond", "value": 18},
+            {"name": "cryptocurrency", "value": 9},
+            {"name": "fund", "value": 7},
         ]
 
     return {"success": True, "data": allocation}

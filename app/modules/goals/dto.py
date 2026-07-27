@@ -9,7 +9,6 @@ class GoalDTO(BaseModel):
     target_amount: float
     current_amount: float
     deadline: datetime | None = None
-    color: str | None = None
     completed: bool
     pct_complete: float | None = 0.0
     eta: str | None = None

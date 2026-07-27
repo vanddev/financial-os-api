@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime
+from sqlalchemy import Boolean, Column, DateTime, Integer, Numeric, String
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -13,7 +13,6 @@ class Account(Base):
     type = Column(String(50), nullable=False)
     current_balance = Column(Numeric(12, 2), nullable=False, default=0)
     initial_balance = Column(Numeric(12, 2), nullable=False, default=0)
-    color = Column(String(20), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())

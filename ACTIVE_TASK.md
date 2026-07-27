@@ -41,38 +41,40 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 ---
 
 ### 1. Tarefa Atual / Contexto
-*   **Solicitado por:** Origem condicional das transações
-*   **Descrição:** Permitir compras no cartão sem conta e validar a origem pelo método.
+*   **Solicitado por:** Remoção de cores dos domínios
+*   **Descrição:** Remover `color` de persistência, contratos, seeds e respostas; apresentação fica no frontend.
 
 ### 2. Objetivo Geral
-*   [x] Tornar `account_id` opcional.
-*   [x] Exigir conta para débito, PIX, transferência e débito automático.
-*   [x] Exigir cartão para compras no crédito.
-*   [x] Impedir conta e cartão simultaneamente.
+*   [x] Remover colunas de accounts, categories e goals.
+*   [x] Remover campos de schemas, DTOs e serviços.
+*   [x] Remover cores de respostas analíticas.
+*   [x] Atualizar seeds e testes.
+*   [x] Criar e revisar migração reversível.
 
 ### 3. Status de Progresso
-*   [x] Mapear arquitetura e contratos existentes.
-*   [x] Implementar validação no schema e no service.
-*   [x] Implementar restrições correspondentes no banco.
-*   [x] Criar e revisar migração Alembic.
-*   [x] Atualizar seed e testes HTTP.
-*   [x] Validar suíte completa, Ruff e MyPy no escopo alterado.
+*   [x] Mapear todas as ocorrências.
+*   [x] Remover campos persistidos e públicos.
+*   [x] Confirmar ausência no OpenAPI e metadata.
+*   [x] Validar migração offline e cabeça única.
+*   [x] Executar testes direcionados e Ruff.
 
 ### 4. Arquivos Modificados / Criados
-* `app/modules/transactions/source_rules.py`
-* `app/modules/transactions/models.py`, `schemas.py`, `service.py`, `router.py`
+* `app/modules/accounts`, `categories` e `goals`
+* `app/modules/dashboard`, `credit_cards` e `investments`
 * `scripts/seed_financial.py`
-* `app/tests/test_schema_validations.py`, `test_transactions.py`
-* `alembic/versions/20260727_0400_transaction_source_rules.py`
+* `app/tests/test_no_domain_colors.py` e testes afetados
+* `alembic/versions/20260727_0500_remove_domain_colors.py`
 
 ### 5. Próximos Passos Imediatos
 1. Aplicar `uv run alembic upgrade head` no banco do ambiente.
-2. Atualizar frontend e bot para enviar a origem compatível com o método.
+2. Atualizar o frontend para resolver todas as cores localmente.
 
 ### 6. Bloqueios e Problemas Conhecidos
 * O worktree contém alterações anteriores da API analítica/MCP que devem ser preservadas.
 * Permanecem os débitos globais preexistentes: 111 erros Ruff e 73 erros MyPy.
-* Validação desta tarefa: 54 testes aprovados; Ruff e MyPy aprovados no escopo alterado.
+* Validação desta tarefa: 12 testes direcionados aprovados e Ruff limpo nos arquivos alterados.
+* A suíte completa parou em testes `TestClient` não relacionados; a execução isolada também travou.
+* MyPy ampliado mantém 22 erros legados de schemas monetários/SQLAlchemy, nenhum ligado a `color`.
 * Permanecem erros MyPy preexistentes nos schemas monetários legados.
 
 ### 7. Comandos para Retomada / Verificação

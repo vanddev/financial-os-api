@@ -11,7 +11,6 @@ class AccountBase(BaseModel):
     name: constr(min_length=1, max_length=120)
     institution: str | None = None
     type: AccountType
-    color: str | None = None
     is_active: bool = True
 
 

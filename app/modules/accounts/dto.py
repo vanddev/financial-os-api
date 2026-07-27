@@ -12,7 +12,6 @@ class AccountDTO(BaseModel):
     type: AccountType
     current_balance: float
     initial_balance: float
-    color: str
     is_active: bool
     income: float | None = 0.0
     expenses: float | None = 0.0

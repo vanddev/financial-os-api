@@ -9,16 +9,16 @@ so that dashboard endpoints and other APIs return expected values for tests.
 from datetime import datetime
 from decimal import Decimal
 
-from app.core.database import SessionLocal, Base, engine
-from app.modules.categories import models as cat_models
+from app.core.database import Base, SessionLocal, engine
 from app.modules.accounts import models as acc_models
+from app.modules.assets import models as asset_models
+from app.modules.categories import models as cat_models
 from app.modules.credit_cards import models as card_models
 from app.modules.goals import models as goal_models
+from app.modules.investments import models as inv_models
+from app.modules.loans import models as loan_models
 from app.modules.subscriptions import models as sub_models
 from app.modules.transactions import models as tx_models
-from app.modules.investments import models as inv_models
-from app.modules.assets import models as asset_models
-from app.modules.loans import models as loan_models
 
 
 def seed():
@@ -44,45 +44,39 @@ def seed():
         cats = [
             (
                 "Moradia",
-                "var(--chart-1)",
                 "home",
                 "expense",
                 ["Aluguel", "Contas", "Financiamento", "Reparos"],
             ),
             (
                 "Alimentação",
-                "var(--chart-2)",
                 "utensils",
                 "expense",
                 ["Supermercado", "Restaurante", "Delivery"],
             ),
             (
                 "Transporte",
-                "var(--chart-3)",
                 "car",
                 "expense",
                 ["Combustível", "App", "Transporte público", "Estacionamento"],
             ),
-            ("Lazer", "var(--chart-4)", "gamepad", "expense", ["Hobbies", "Viagem", "Eventos"]),
+            ("Lazer", "gamepad", "expense", ["Hobbies", "Viagem", "Eventos"]),
             (
                 "Saúde",
-                "var(--chart-5)",
                 "heartbeat",
                 "expense",
                 ["Farmácia", "Consultas", "Fitness"],
             ),
             (
                 "Assinaturas",
-                "var(--chart-2)",
                 "repeat",
                 "expense",
                 ["Streaming", "Música", "Software", "Armazenamento"],
             ),
-            ("Renda", "#00CC66", "wallet", "income", ["Salário", "Freelance", "Dividendos"]),
-            ("Eletrônicos", "#AA88FF", "tv", "expense", ["Computador", "Celular", "Acessórios"]),
+            ("Renda", "wallet", "income", ["Salário", "Freelance", "Dividendos"]),
+            ("Eletrônicos", "tv", "expense", ["Computador", "Celular", "Acessórios"]),
             (
                 "Financeiro",
-                "#888888",
                 "piggy-bank",
                 "expense",
                 ["Cartão de crédito", "Taxas", "Investimentos"],
@@ -90,8 +84,8 @@ def seed():
         ]
 
         category_objs = {}
-        for name, color, icon, ctype, subs in cats:
-            c = cat_models.Category(name=name, color=color, icon=icon, type=ctype)
+        for name, icon, ctype, subs in cats:
+            c = cat_models.Category(name=name, icon=icon, type=ctype)
             c.subcategories = [cat_models.Subcategory(name=s) for s in subs]
             db.add(c)
             category_objs[name] = c
@@ -105,7 +99,6 @@ def seed():
                 "checking",
                 Decimal("15420.15"),
                 Decimal("15420.15"),
-                "#3366FF",
             ),
             (
                 "Poupança de alta rentabilidade",
@@ -113,7 +106,6 @@ def seed():
                 "savings",
                 Decimal("22960.40"),
                 Decimal("22960.40"),
-                "#33CC66",
             ),
             (
                 "Conta Corretora",
@@ -121,7 +113,6 @@ def seed():
                 "investment",
                 Decimal("148320.90"),
                 Decimal("148320.90"),
-                "#CC33AA",
             ),
             (
                 "Reserva de Emergência",
@@ -129,19 +120,17 @@ def seed():
                 "savings",
                 Decimal("32000.00"),
                 Decimal("32000.00"),
-                "#FFCC00",
             ),
         ]
 
         account_objs = {}
-        for name, inst, atype, init_bal, cur_bal, color in accounts:
+        for name, inst, atype, init_bal, cur_bal in accounts:
             a = acc_models.Account(
                 name=name,
                 institution=inst,
                 type=atype.lower(),
                 initial_balance=init_bal,
                 current_balance=cur_bal,
-                color=color,
                 is_active=True,
             )
             db.add(a)
@@ -248,7 +237,6 @@ def seed():
                 Decimal("45000.00"),
                 Decimal("32000.00"),
                 datetime(2025, 12, 31),
-                "var(--chart-1)",
                 False,
             ),
             (
@@ -256,7 +244,6 @@ def seed():
                 Decimal("22000.00"),
                 Decimal("8400.00"),
                 datetime(2026, 4, 30),
-                "var(--chart-2)",
                 False,
             ),
             (
@@ -264,7 +251,6 @@ def seed():
                 Decimal("12000.00"),
                 Decimal("6800.00"),
                 datetime(2025, 9, 30),
-                "var(--chart-3)",
                 False,
             ),
             (
@@ -272,7 +258,6 @@ def seed():
                 Decimal("90000.00"),
                 Decimal("12000.00"),
                 datetime(2027, 6, 30),
-                "var(--chart-4)",
                 False,
             ),
             (
@@ -280,17 +265,15 @@ def seed():
                 Decimal("30000.00"),
                 Decimal("4500.00"),
                 datetime(2026, 3, 31),
-                "var(--chart-5)",
                 False,
             ),
         ]
-        for name, target, current, deadline, color, completed in goals:
+        for name, target, current, deadline, completed in goals:
             g = goal_models.Goal(
                 name=name,
                 target_amount=target,
                 current_amount=current,
                 deadline=deadline,
-                color=color,
                 completed=completed,
             )
             db.add(g)
@@ -646,7 +629,6 @@ def seed():
             tdate = item[8]
             installment_number = None
             installment_total = None
-            credit_card_id = None
             card_name = None
             if len(item) >= 11:
                 installment_number = item[9]

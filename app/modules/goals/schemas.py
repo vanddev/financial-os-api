@@ -10,7 +10,6 @@ class GoalBase(BaseModel):
     target_amount: Money
     current_amount: Money | None = 0
     deadline: datetime | None = None
-    color: str | None = None
     completed: bool = False
 
 

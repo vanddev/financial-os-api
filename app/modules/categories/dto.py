@@ -16,7 +16,6 @@ class SubCategoryDTO(BaseModel):
 class CategoryDTO(BaseModel):
     id: int
     name: str
-    color: str
     icon: str
     type: CashFlowType
     created_at: datetime

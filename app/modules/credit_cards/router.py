@@ -171,7 +171,7 @@ def get_card_category_breakdown(card_id: int, db: Session = Depends(get_db)):
     end_date = datetime(2025, 7, 31, 23, 59, 59)
 
     results = (
-        db.query(Category.name, Category.color, func.sum(Transaction.amount).label("total"))
+        db.query(Category.name, func.sum(Transaction.amount).label("total"))
         .join(Transaction, Transaction.category_id == Category.id)
         .filter(
             Transaction.credit_card_id == card_id,
@@ -184,24 +184,24 @@ def get_card_category_breakdown(card_id: int, db: Session = Depends(get_db)):
     )
 
     data = []
-    for name, color, total in results:
-        data.append({"name": name, "value": float(total), "color": color})
+    for name, total in results:
+        data.append({"name": name, "value": float(total)})
 
     if not data:
         if card_id == 1:
             data = [
-                {"name": "Alimentação", "value": 1240, "color": "var(--chart-1)"},
-                {"name": "Viagem", "value": 1980, "color": "var(--chart-2)"},
-                {"name": "Compras", "value": 1650, "color": "var(--chart-3)"},
-                {"name": "Assinaturas", "value": 240, "color": "var(--chart-4)"},
-                {"name": "Outros", "value": 1300, "color": "var(--chart-5)"},
+                {"name": "Alimentação", "value": 1240},
+                {"name": "Viagem", "value": 1980},
+                {"name": "Compras", "value": 1650},
+                {"name": "Assinaturas", "value": 240},
+                {"name": "Outros", "value": 1300},
             ]
         else:
             data = [
-                {"name": "Mercado", "value": 180, "color": "var(--chart-1)"},
-                {"name": "Combustível", "value": 120, "color": "var(--chart-2)"},
-                {"name": "Streaming", "value": 90, "color": "var(--chart-3)"},
-                {"name": "Outros", "value": 42, "color": "var(--chart-4)"},
+                {"name": "Mercado", "value": 180},
+                {"name": "Combustível", "value": 120},
+                {"name": "Streaming", "value": 90},
+                {"name": "Outros", "value": 42},
             ]
 
     return {"success": True, "data": data}

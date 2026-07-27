@@ -47,7 +47,6 @@ class CreditCardInstallmentItem(BaseModel):
 class CreditCardCategoryBreakdownItem(BaseModel):
     name: str
     value: float
-    color: str | None = None
 
 
 class CreditCardBiggestPurchaseItem(BaseModel):

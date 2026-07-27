@@ -1,3 +1,3 @@
-from app.shared.responses.api import ErrorResponse, SuccessResponse
+from app.shared.responses.api import ERROR_RESPONSES, ErrorDetail, ErrorResponse, SuccessResponse
 
-__all__ = ["SuccessResponse", "ErrorResponse"]
+__all__ = ["ERROR_RESPONSES", "ErrorDetail", "ErrorResponse", "SuccessResponse"]

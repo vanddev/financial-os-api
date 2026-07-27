@@ -6,6 +6,20 @@ import pytest
 from app.modules.transactions import schemas as tx_schemas
 
 
+def test_transaction_create_openapi_has_conditional_sources_as_optional():
+    schema = tx_schemas.TransactionCreate.model_json_schema()
+    required = set(schema["required"])
+
+    assert required == {
+        "category_id",
+        "amount",
+        "transaction_type",
+        "transaction_date",
+    }
+    assert "account_id" not in required
+    assert "credit_card_id" not in required
+
+
 def test_transaction_amount_zero_raises():
     with pytest.raises(ValueError):
         tx_schemas.TransactionCreate(

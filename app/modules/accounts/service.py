@@ -1,7 +1,6 @@
-from decimal import Decimal
 from sqlalchemy.orm import Session
-from app.core.exceptions import AppException
 
+from app.core.exceptions import AppException
 from app.modules.accounts import models, repository, schemas
 
 
@@ -19,7 +18,6 @@ class AccountService:
             type=payload.type,
             initial_balance=payload.initial_balance,
             current_balance=payload.initial_balance,
-            color=payload.color,
             is_active=payload.is_active,
         )
         return self.repo.create(account)
@@ -52,8 +50,6 @@ class AccountService:
             acc.institution = payload.institution
         if payload.type is not None:
             acc.type = payload.type
-        if payload.color is not None:
-            acc.color = payload.color
         if payload.is_active is not None:
             acc.is_active = payload.is_active
         if payload.initial_balance is not None:

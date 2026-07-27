@@ -59,7 +59,6 @@ class InvestmentListResponse(PageResponse[InvestmentListItem]):
 class InvestmentAllocationItem(BaseModel):
     name: str
     value: float
-    color: str
 
 
 class InvestmentSeriesItem(BaseModel):
