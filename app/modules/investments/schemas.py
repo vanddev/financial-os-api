@@ -3,12 +3,13 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.shared.domain_enums import InvestmentType
 from app.shared.pagination.paginator import PageResponse
 
 
 class InvestmentBase(BaseModel):
     ticker: str
-    asset_type: str | None = None
+    asset_type: InvestmentType | None = None
     quantity: Decimal
     average_price: Decimal
     current_price: Decimal | None = None
@@ -21,7 +22,7 @@ class InvestmentCreate(InvestmentBase):
 
 class InvestmentUpdate(BaseModel):
     ticker: str | None = None
-    asset_type: str | None = None
+    asset_type: InvestmentType | None = None
     quantity: Decimal | None = None
     average_price: Decimal | None = None
     current_price: Decimal | None = None
@@ -42,7 +43,7 @@ class InvestmentListItem(BaseModel):
     id: int
     ticker: str
     name: str
-    type: str | None = None
+    type: InvestmentType | None = None
     qty: float
     avg: float
     price: float

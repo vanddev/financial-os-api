@@ -16,7 +16,9 @@ class Category(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
-    subcategories = relationship("Subcategory", back_populates="category", cascade="all, delete-orphan")
+    subcategories = relationship(
+        "Subcategory", back_populates="category", cascade="all, delete-orphan"
+    )
 
 
 class Subcategory(Base):

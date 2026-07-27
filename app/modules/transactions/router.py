@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.modules.transactions import schemas, service
 from app.modules.transactions.dto import TransactionDTO
+from app.shared.domain_enums import TransactionStatus
 from app.shared.pagination.paginator import PageResponse
 from app.shared.responses.api import SuccessResponse
 
@@ -19,7 +20,7 @@ def list_transactions(
     account_id: int | None = None,
     category_id: int | None = None,
     credit_card_id: int | None = None,
-    status: str | None = None,
+    status: TransactionStatus | None = None,
     description: str | None = None,
     min_amount: float | None = None,
     max_amount: float | None = None,

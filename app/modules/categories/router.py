@@ -11,10 +11,19 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 
 @router.get("/", response_model=SuccessResponse[PageResponse[CategoryDTO]])
-def list_categories(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1), sort: str = "id", order: str = "asc", db: Session = Depends(get_db)):
+def list_categories(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1),
+    sort: str = "id",
+    order: str = "asc",
+    db: Session = Depends(get_db),
+):
     svc = service.CategoryService(db)
     items, total = svc.list(page=page, page_size=page_size, sort=sort, order=order)
-    return {"success": True, "data": {"items": items, "page": page, "page_size": page_size, "total": total}}
+    return {
+        "success": True,
+        "data": {"items": items, "page": page, "page_size": page_size, "total": total},
+    }
 
 
 @router.post("/", response_model=SuccessResponse)
@@ -32,7 +41,9 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{category_id}", response_model=SuccessResponse)
-def update_category(category_id: int, payload: schemas.CategoryUpdate, db: Session = Depends(get_db)):
+def update_category(
+    category_id: int, payload: schemas.CategoryUpdate, db: Session = Depends(get_db)
+):
     svc = service.CategoryService(db)
     c = svc.update(category_id, payload)
     return {"success": True, "data": c}
@@ -46,15 +57,22 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{category_id}/subcategories", response_model=SuccessResponse)
-def create_subcategory(category_id: int, payload: schemas.SubcategoryCreate, db: Session = Depends(get_db)):
+def create_subcategory(
+    category_id: int, payload: schemas.SubcategoryCreate, db: Session = Depends(get_db)
+):
     from fastapi import HTTPException
+
     cat = db.query(models.Category).filter(models.Category.id == category_id).first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found")
 
     from app.modules.categories.models import Subcategory
+
     sub = Subcategory(category_id=category_id, name=payload.name)
     db.add(sub)
     db.commit()
     db.refresh(sub)
-    return {"success": True, "data": {"id": sub.id, "category_id": sub.category_id, "name": sub.name}}
+    return {
+        "success": True,
+        "data": {"id": sub.id, "category_id": sub.category_id, "name": sub.name},
+    }

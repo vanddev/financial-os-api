@@ -30,9 +30,18 @@ class AccountService:
             raise AppException("Account not found")
         return acc
 
-    def list(self, page: int = 1, page_size: int = 20, active: bool | None = None, sort: str = "id", order: str = "asc"):
+    def list(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        active: bool | None = None,
+        sort: str = "id",
+        order: str = "asc",
+    ):
         skip = (page - 1) * page_size
-        items, total = self.repo.list(skip=skip, limit=page_size, active=active, sort=sort, order=order)
+        items, total = self.repo.list(
+            skip=skip, limit=page_size, active=active, sort=sort, order=order
+        )
         return items, total
 
     def update(self, account_id: int, payload: schemas.AccountUpdate) -> models.Account:

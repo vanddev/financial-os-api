@@ -41,38 +41,40 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 ---
 
 ### 1. Tarefa Atual / Contexto
-*   **Solicitado por:** Proteção contra registros financeiros duplicados
-*   **Descrição:** Implementar `Idempotency-Key` no `POST /transactions/`.
+*   **Solicitado por:** Padronização dos domínios analíticos
+*   **Descrição:** Substituir strings livres por enums e usar valores canônicos em inglês.
 
 ### 2. Objetivo Geral
-*   [x] Exigir a chave no endpoint de criação.
-*   [x] Persistir chave e hash do payload com unicidade no banco.
-*   [x] Reutilizar a resposta da criação em retries equivalentes.
-*   [x] Rejeitar com `409` a mesma chave associada a payload diferente.
+*   [x] Definir enums compartilhados para os domínios finitos.
+*   [x] Validar schemas de contas, categorias, transações, ativos, investimentos e empréstimos.
+*   [x] Padronizar dados de seed e respostas derivadas.
+*   [x] Migrar valores portugueses existentes para inglês.
 
 ### 3. Status de Progresso
 *   [x] Mapear arquitetura e contratos existentes.
-*   [x] Implementar modelo, repository, service e router.
+*   [x] Inventariar campos categóricos e valores existentes.
+*   [x] Implementar e aplicar enums nos contratos da API.
 *   [x] Criar e revisar migração Alembic.
-*   [x] Adicionar testes de integração HTTP.
-*   [x] Validar testes, Ruff e MyPy no escopo alterado.
+*   [x] Adicionar testes de aceitação e rejeição dos valores.
+*   [x] Validar testes e Ruff no escopo alterado.
 
 ### 4. Arquivos Modificados / Criados
-* `app/modules/transactions/models.py`
-* `app/modules/transactions/repository.py`
-* `app/modules/transactions/service.py`
-* `app/modules/transactions/router.py`
-* `app/tests/test_transactions.py`
-* `alembic/versions/20260727_0000_add_transaction_idempotency.py`
+* `app/shared/domain_enums.py`
+* Schemas e DTOs dos módulos afetados
+* `scripts/seed_financial.py`
+* `app/tests/test_domain_enums.py`
+* `alembic/versions/20260727_0100_normalize_domain_values.py`
 
 ### 5. Próximos Passos Imediatos
 1. Aplicar `uv run alembic upgrade head` no banco do ambiente.
-2. Atualizar frontend e bot para enviar uma chave estável por operação.
+2. Atualizar frontend e bot para enviar os valores canônicos documentados no OpenAPI.
 
 ### 6. Bloqueios e Problemas Conhecidos
 * O worktree contém alterações anteriores da API analítica/MCP que devem ser preservadas.
 * Permanecem os débitos globais preexistentes: 111 erros Ruff e 73 erros MyPy.
-* Validação desta tarefa: 44 testes aprovados; Ruff e MyPy aprovados no escopo alterado.
+* `brokerage` removido dos métodos de pagamento e normalizado para `bank_transfer`.
+* Validação desta tarefa: 44 testes aprovados; Ruff aprovado no escopo alterado.
+* Permanecem erros MyPy preexistentes nos schemas monetários legados.
 
 ### 7. Comandos para Retomada / Verificação
 ```bash

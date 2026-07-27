@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from app.shared.domain_enums import CashFlowType, PaymentMethod, TransactionStatus
+
 
 class TransactionBase(BaseModel):
     account_id: int
@@ -11,9 +13,9 @@ class TransactionBase(BaseModel):
     credit_card_id: int | None = None
     description: str | None = None
     amount: Decimal
-    transaction_type: str
-    payment_method: str | None = None
-    status: str | None = None
+    transaction_type: CashFlowType
+    payment_method: PaymentMethod | None = None
+    status: TransactionStatus | None = None
     transaction_date: datetime
     competency_date: datetime | None = None
     installment_number: int | None = None
@@ -46,9 +48,9 @@ class TransactionUpdate(BaseModel):
     credit_card_id: int | None = None
     description: str | None = None
     amount: Decimal | None = None
-    transaction_type: str | None = None
-    payment_method: str | None = None
-    status: str | None = None
+    transaction_type: CashFlowType | None = None
+    payment_method: PaymentMethod | None = None
+    status: TransactionStatus | None = None
     transaction_date: datetime | None = None
     competency_date: datetime | None = None
     installment_number: int | None = None

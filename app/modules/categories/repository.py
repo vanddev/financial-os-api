@@ -11,7 +11,9 @@ class CategoryRepository:
     def get(self, category_id: int) -> models.Category | None:
         return self.db.query(models.Category).filter(models.Category.id == category_id).first()
 
-    def list(self, skip: int = 0, limit: int = 20, sort: str = "id", order: str = "asc") -> tuple[_List[models.Category], int]:
+    def list(
+        self, skip: int = 0, limit: int = 20, sort: str = "id", order: str = "asc"
+    ) -> tuple[_List[models.Category], int]:
         q = self.db.query(models.Category)
         total = q.count()
         if order.lower() == "desc":

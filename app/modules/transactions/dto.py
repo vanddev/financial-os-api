@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from app.shared.domain_enums import CashFlowType, PaymentMethod, TransactionStatus
+
 
 class TransactionDTO(BaseModel):
     id: int
@@ -12,9 +14,9 @@ class TransactionDTO(BaseModel):
     credit_card_id: int | None = None
     description: str | None = None
     amount: float
-    transaction_type: str | None = None
-    payment_method: str | None = None
-    status: str | None = None
+    transaction_type: CashFlowType | None = None
+    payment_method: PaymentMethod | None = None
+    status: TransactionStatus | None = None
     transaction_date: datetime
     competency_date: datetime | None = None
     installment_number: int | None = None

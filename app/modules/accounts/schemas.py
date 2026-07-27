@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, condecimal, constr
+from pydantic import BaseModel, ConfigDict, Field, condecimal, constr
+
+from app.shared.domain_enums import AccountType
 
 PositiveMoney = condecimal(max_digits=12, decimal_places=2)
 
@@ -8,7 +10,7 @@ PositiveMoney = condecimal(max_digits=12, decimal_places=2)
 class AccountBase(BaseModel):
     name: constr(min_length=1, max_length=120)
     institution: str | None = None
-    type: constr(min_length=1, max_length=50)
+    type: AccountType
     color: str | None = None
     is_active: bool = True
 
@@ -29,5 +31,4 @@ class AccountOut(AccountBase):
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

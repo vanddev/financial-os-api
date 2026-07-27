@@ -2,6 +2,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.shared.domain_enums import CashFlowType
+
+
 class SubCategoryDTO(BaseModel):
     id: int
     category_id: int
@@ -9,12 +12,13 @@ class SubCategoryDTO(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CategoryDTO(BaseModel):
     id: int
     name: str
     color: str
     icon: str
-    type: str
+    type: CashFlowType
     created_at: datetime
     updated_at: datetime
     subcategories: list[SubCategoryDTO] = []

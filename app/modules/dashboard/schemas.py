@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.shared.domain_enums import CashFlowType
+
 
 class DashboardSummary(BaseModel):
     current_balance: float = Field(alias="currentBalance")
@@ -39,4 +41,4 @@ class DashboardCashflowCalendarItem(BaseModel):
     day: int
     label: str
     amount: float
-    type: str
+    type: CashFlowType

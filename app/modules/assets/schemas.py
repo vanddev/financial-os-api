@@ -3,12 +3,13 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.shared.domain_enums import AssetType
 from app.shared.pagination.paginator import PageResponse
 
 
 class AssetBase(BaseModel):
     name: str
-    asset_type: str | None = None
+    asset_type: AssetType | None = None
     purchase_value: Decimal
     current_value: Decimal
     purchase_date: datetime | None = None
@@ -20,7 +21,7 @@ class AssetCreate(AssetBase):
 
 class AssetUpdate(BaseModel):
     name: str | None = None
-    asset_type: str | None = None
+    asset_type: AssetType | None = None
     purchase_value: Decimal | None = None
     current_value: Decimal | None = None
     purchase_date: datetime | None = None
@@ -38,7 +39,7 @@ class AssetOut(AssetBase):
 class AssetListItem(BaseModel):
     id: int
     name: str
-    type: str | None = None
+    type: AssetType | None = None
     purchase: float
     current: float
     delta: float

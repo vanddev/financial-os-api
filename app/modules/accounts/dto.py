@@ -2,12 +2,14 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.shared.domain_enums import AccountType
+
 
 class AccountDTO(BaseModel):
     id: int
     name: str
     institution: str
-    type: str
+    type: AccountType
     current_balance: float
     initial_balance: float
     color: str

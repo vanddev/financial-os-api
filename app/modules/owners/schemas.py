@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.shared.domain_enums import AccountType
+
 
 def normalize_phone(phone: str) -> str:
     if re.fullmatch(r"[+\d\s().-]+", phone) is None:
@@ -34,7 +36,7 @@ class AccountSummary(BaseModel):
     id: int
     name: str
     institution: str | None
-    type: str
+    type: AccountType
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

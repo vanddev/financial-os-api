@@ -100,7 +100,7 @@ def test_create_transaction_serializes_orm_model(db_session):
             "transaction_date": "2026-07-20T00:00:00",
             "credit_card_id": None,
             "description": "Teste",
-            "payment_method": "Débito",
+            "payment_method": "debit_card",
             "status": "cleared",
             "installment_number": None,
             "installment_total": None,

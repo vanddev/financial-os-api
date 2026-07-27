@@ -1,5 +1,8 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
+
+from app.shared.domain_enums import CashFlowType
 
 
 class SubcategoryBase(BaseModel):
@@ -21,7 +24,7 @@ class CategoryBase(BaseModel):
     name: str
     color: str | None = None
     icon: str | None = None
-    type: str
+    type: CashFlowType
 
 
 class CategoryCreate(CategoryBase):
@@ -32,7 +35,7 @@ class CategoryUpdate(BaseModel):
     name: str | None = None
     color: str | None = None
     icon: str | None = None
-    type: str | None = None
+    type: CashFlowType | None = None
 
 
 class CategoryOut(CategoryBase):

@@ -11,7 +11,14 @@ class AccountRepository:
     def get(self, account_id: int) -> models.Account | None:
         return self.db.query(models.Account).filter(models.Account.id == account_id).first()
 
-    def list(self, skip: int = 0, limit: int = 20, active: bool | None = None, sort: str = "id", order: str = "asc") -> tuple[_List[models.Account], int]:
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 20,
+        active: bool | None = None,
+        sort: str = "id",
+        order: str = "asc",
+    ) -> tuple[_List[models.Account], int]:
         q = self.db.query(models.Account)
         if active is not None:
             q = q.filter(models.Account.is_active == active)

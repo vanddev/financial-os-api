@@ -3,10 +3,12 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
+from app.shared.domain_enums import LoanType
+
 
 class LoanBase(BaseModel):
     name: str
-    loan_type: str | None = None
+    loan_type: LoanType | None = None
     original_amount: Decimal
     current_balance: Decimal
     interest_rate: Decimal | None = None
@@ -20,7 +22,7 @@ class LoanCreate(LoanBase):
 
 class LoanUpdate(BaseModel):
     name: str | None = None
-    loan_type: str | None = None
+    loan_type: LoanType | None = None
     original_amount: Decimal | None = None
     current_balance: Decimal | None = None
     interest_rate: Decimal | None = None

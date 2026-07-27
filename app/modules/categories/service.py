@@ -10,7 +10,9 @@ class CategoryService:
         self.repo = repository.CategoryRepository(db)
 
     def create(self, payload: schemas.CategoryCreate) -> models.Category:
-        cat = models.Category(name=payload.name, color=payload.color, icon=payload.icon, type=payload.type)
+        cat = models.Category(
+            name=payload.name, color=payload.color, icon=payload.icon, type=payload.type
+        )
         if payload.subcategories:
             cat.subcategories = [models.Subcategory(name=s.name) for s in payload.subcategories]
         return self.repo.create(cat)
