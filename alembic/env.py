@@ -16,6 +16,7 @@ from app.modules.credit_cards import models as _credit_cards_models  # noqa: F40
 from app.modules.goals import models as _goals_models  # noqa: F401
 from app.modules.investments import models as _investments_models  # noqa: F401
 from app.modules.loans import models as _loans_models  # noqa: F401
+from app.modules.owners import models as _owners_models  # noqa: F401
 from app.modules.settings import models as _settings_models  # noqa: F401
 from app.modules.subscriptions import models as _subscriptions_models  # noqa: F401
 from app.modules.transactions import models as _transactions_models  # noqa: F401
