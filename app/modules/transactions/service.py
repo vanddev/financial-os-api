@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import AppException
 from app.modules.transactions import models, repository, schemas
+from app.modules.transactions.source_rules import validate_transaction_source
 
 
 class IdempotencyConflictError(Exception):
@@ -22,6 +23,11 @@ class TransactionService:
         payload: schemas.TransactionCreate,
         idempotency_key: str | None = None,
     ) -> models.Transaction:
+        validate_transaction_source(
+            payment_method=payload.payment_method,
+            account_id=payload.account_id,
+            credit_card_id=payload.credit_card_id,
+        )
         if payload.installment_number and payload.installment_total:
             if payload.installment_number > payload.installment_total:
                 raise AppException("installment_number cannot be greater than installment_total")
@@ -88,7 +94,13 @@ class TransactionService:
 
     def update(self, tx_id: int, payload: schemas.TransactionUpdate) -> models.Transaction:
         t = self.get(tx_id)
-        for k, v in payload.model_dump().items():
+        changes = payload.model_dump(exclude_unset=True)
+        validate_transaction_source(
+            payment_method=changes.get("payment_method", t.payment_method),
+            account_id=changes.get("account_id", t.account_id),
+            credit_card_id=changes.get("credit_card_id", t.credit_card_id),
+        )
+        for k, v in changes.items():
             setattr(t, k, v)
         return self.repo.update(t)
 

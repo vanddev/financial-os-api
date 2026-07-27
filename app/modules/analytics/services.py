@@ -4,7 +4,7 @@ import calendar
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Literal
+from typing import Literal, cast
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.modules.accounts.models import Account
 from app.modules.assets.models import Asset
 from app.modules.budgets.models import Budget
-from app.modules.categories.models import Category
+from app.modules.categories.models import Category, Subcategory
 from app.modules.credit_cards.models import CreditCard
 from app.modules.investments.models import Investment
 from app.modules.loans.models import Loan
@@ -42,7 +42,7 @@ def _money(value: Decimal | int | None) -> float:
 
 
 def _positive_amount(transaction: Transaction) -> Decimal:
-    return abs(Decimal(transaction.amount))
+    return Decimal(transaction.amount)
 
 
 def _transactions(
@@ -154,18 +154,53 @@ def get_cash_flow(
     )
 
 
-def get_budget_status(db: Session, month: int, year: int) -> schemas.BudgetStatusResponse:
+def get_budget_status(
+    db: Session,
+    month: int,
+    year: int,
+    category: int | None = None,
+) -> schemas.BudgetStatusResponse:
     start, end = month_bounds(month, year)
-    budgets = list(
-        db.scalars(select(Budget).where(Budget.month == month, Budget.year == year)).all()
-    )
+    budget_statement = select(Budget).where(Budget.month == month, Budget.year == year)
+    selected_category_id: int | None = None
+    selected_subcategory_id: int | None = None
+    if category is not None:
+        selected_category_id = db.scalar(
+            select(Category.id).where(Category.id == category)
+        )
+        if selected_category_id is None:
+            subcategory = db.scalar(
+                select(Subcategory).where(Subcategory.id == category)
+            )
+            if subcategory is not None:
+                selected_category_id = cast(int, subcategory.category_id)
+                selected_subcategory_id = cast(int, subcategory.id)
+        if selected_category_id is None:
+            budget_statement = budget_statement.where(Budget.category_id == category)
+        else:
+            budget_statement = budget_statement.where(
+                Budget.category_id == selected_category_id
+            )
+    budgets = list(db.scalars(budget_statement).all())
     names = {category.id: category.name for category in db.scalars(select(Category)).all()}
     planned_by_category: dict[int, Decimal] = defaultdict(lambda: ZERO)
     for budget in budgets:
         planned_by_category[budget.category_id] += Decimal(budget.planned_amount)
     actual_by_category: dict[int, Decimal] = defaultdict(lambda: ZERO)
     for tx in _transactions(db, start, end):
-        if tx.transaction_type == "expense":
+        matches_category = (
+            category is None
+            or (
+                selected_subcategory_id is not None
+                and tx.subcategory_id == selected_subcategory_id
+            )
+            or (
+                selected_subcategory_id is None
+                and selected_category_id is not None
+                and tx.category_id == selected_category_id
+            )
+        )
+        if tx.transaction_type == "expense" and matches_category:
             actual_by_category[tx.category_id] += _positive_amount(tx)
     items = []
     for category_id in sorted(set(planned_by_category) | set(actual_by_category)):

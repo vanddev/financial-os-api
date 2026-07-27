@@ -28,12 +28,31 @@ class Transaction(Base):
             "(idempotency_key IS NOT NULL AND request_hash IS NOT NULL)",
             name="ck_transactions_idempotency_pair",
         ),
+        CheckConstraint(
+            "amount > 0",
+            name="ck_transactions_amount_positive",
+        ),
+        CheckConstraint(
+            "account_id IS NULL OR credit_card_id IS NULL",
+            name="ck_transactions_single_source",
+        ),
+        CheckConstraint(
+            "payment_method != 'credit_card' OR "
+            "(credit_card_id IS NOT NULL AND account_id IS NULL)",
+            name="ck_transactions_credit_card_source",
+        ),
+        CheckConstraint(
+            "payment_method NOT IN "
+            "('debit_card', 'pix', 'bank_transfer', 'automatic_debit') OR "
+            "(account_id IS NOT NULL AND credit_card_id IS NULL)",
+            name="ck_transactions_account_source",
+        ),
     )
 
     id = Column(Integer, primary_key=True, index=True)
     idempotency_key = Column(String(255), nullable=True)
     request_hash = Column(String(64), nullable=True)
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"), nullable=True)
     credit_card_id = Column(Integer, ForeignKey("credit_cards.id"), nullable=True)

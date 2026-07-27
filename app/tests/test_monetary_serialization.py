@@ -22,7 +22,7 @@ from app.modules.transactions.dto import TransactionDTO
         (CreditCardDTO, "limit", Decimal("5000.00")),
         (GoalDTO, "target_amount", Decimal("1000.00")),
         (SubscriptionDTO, "monthly_value", Decimal("39.90")),
-        (TransactionDTO, "amount", Decimal("-12.34")),
+        (TransactionDTO, "amount", Decimal("12.34")),
         (AssetOut, "current_value", Decimal("250.00")),
         (BudgetOut, "planned_amount", Decimal("800.00")),
         (InvestmentOut, "current_price", Decimal("42.50")),

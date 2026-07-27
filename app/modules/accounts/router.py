@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.modules.accounts import schemas, service
 from app.modules.accounts.dto import AccountDTO
+from app.modules.transactions.amounts import signed_amount
 from app.modules.transactions.dto import TransactionDTO
 from app.shared.domain_enums import TransactionStatus
 from app.shared.pagination.paginator import PageResponse
@@ -56,7 +57,7 @@ def list_accounts(
         ).scalar() or Decimal("0.00")
 
         item.income = income
-        item.expenses = abs(expenses)
+        item.expenses = expenses
         enriched_items.append(item)
 
     return {
@@ -92,7 +93,10 @@ def get_account_balance_history(account_id: int, db: Session = Depends(get_db)):
     monthly_sums = defaultdict(Decimal)
     for tx in txs:
         date = tx.transaction_date
-        monthly_sums[(date.year, date.month)] += tx.amount
+        monthly_sums[(date.year, date.month)] += signed_amount(
+            tx.amount,
+            tx.transaction_type,
+        )
 
     months_keys = [(2025, 7), (2025, 6), (2025, 5), (2025, 4), (2025, 3), (2025, 2)]
 

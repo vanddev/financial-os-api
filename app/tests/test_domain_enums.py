@@ -34,7 +34,7 @@ from app.modules.transactions.schemas import TransactionCreate
             {
                 "account_id": 1,
                 "category_id": 1,
-                "amount": -10,
+                "amount": 10,
                 "transaction_type": "expense",
                 "payment_method": "Débito",
                 "transaction_date": datetime(2026, 7, 27),
@@ -84,7 +84,7 @@ def test_transaction_schema_accepts_canonical_english_values():
     transaction = TransactionCreate(
         account_id=1,
         category_id=1,
-        amount=Decimal("-10"),
+        amount=Decimal("10"),
         transaction_type="expense",
         payment_method="debit_card",
         status="cleared",
@@ -101,7 +101,7 @@ def test_transaction_schema_rejects_removed_brokerage_method():
         TransactionCreate(
             account_id=1,
             category_id=1,
-            amount=Decimal("-10"),
+            amount=Decimal("10"),
             transaction_type="expense",
             payment_method="brokerage",
             transaction_date=datetime(2026, 7, 27),

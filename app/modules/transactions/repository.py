@@ -36,6 +36,10 @@ class TransactionRepository:
                 q = q.filter(models.Transaction.credit_card_id == filters["credit_card_id"])
             if filters.get("status"):
                 q = q.filter(models.Transaction.status == filters["status"])
+            if filters.get("transaction_type"):
+                q = q.filter(
+                    models.Transaction.transaction_type == filters["transaction_type"]
+                )
             if filters.get("description"):
                 q = q.filter(models.Transaction.description.ilike(f"%{filters['description']}%"))
             if filters.get("min_amount") is not None:

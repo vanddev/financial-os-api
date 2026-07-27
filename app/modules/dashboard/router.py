@@ -60,7 +60,7 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     )
 
     monthly_income = sum(tx.amount for tx in txs if tx.transaction_type == "income")
-    monthly_expenses = abs(sum(tx.amount for tx in txs if tx.transaction_type == "expense"))
+    monthly_expenses = sum(tx.amount for tx in txs if tx.transaction_type == "expense")
 
     savings_rate = 0.0
     if monthly_income > 0:
@@ -82,20 +82,24 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         emergency_fund = emergency_goal.current_amount
 
     # 5. Credit card debt (sum of current billing cycle or transactions)
-    # Let's sum negative transactions on cards for this month
-    credit_card_debt = abs(
-        sum(
-            tx.amount
-            for tx in txs
-            if tx.credit_card_id is not None and tx.transaction_type == "expense"
-        )
+    credit_card_debt = sum(
+        tx.amount
+        for tx in txs
+        if tx.credit_card_id is not None and tx.transaction_type == "expense"
     )
     if credit_card_debt == 0:
         credit_card_debt = Decimal("6842.11")  # Fallback
 
     # 6. Upcoming Bills (scheduled transactions)
-    upcoming_txs = db.query(Transaction).filter(Transaction.status == "scheduled").all()
-    upcoming_bills = abs(sum(tx.amount for tx in upcoming_txs))
+    upcoming_txs = (
+        db.query(Transaction)
+        .filter(
+            Transaction.status == "scheduled",
+            Transaction.transaction_type == "expense",
+        )
+        .all()
+    )
+    upcoming_bills = sum(tx.amount for tx in upcoming_txs)
 
     # 7. Cash Flow 30d
     cash_flow_30d = monthly_income - monthly_expenses
@@ -167,7 +171,7 @@ def get_dashboard_expense_breakdown(db: Session = Depends(get_db)):
 
     data = []
     for name, color, total in results:
-        data.append({"name": name, "value": float(abs(total)), "color": color})
+        data.append({"name": name, "value": float(total), "color": color})
 
     # If empty, return standard breakdown matching mock
     if not data:
@@ -190,17 +194,16 @@ def get_dashboard_expense_breakdown(db: Session = Depends(get_db)):
 def get_dashboard_cashflow_calendar(db: Session = Depends(get_db)):
     # Return list of cashflow events for calendar
     data = [
-        {"day": 1, "label": "Academia", "amount": -159.9, "type": "out"},
-        {"day": 3, "label": "Spotify", "amount": -34.9, "type": "out"},
-        {"day": 5, "label": "Freelance", "amount": 3200, "type": "in"},
-        {"day": 7, "label": "Conta de luz", "amount": -218.75, "type": "out"},
-        {"day": 10, "label": "Netflix", "amount": -55.9, "type": "out"},
-        {"day": 11, "label": "Aluguel", "amount": -3200, "type": "out"},
-        {"day": 14, "label": "Salário", "amount": 18500, "type": "in"},
-        {"day": 16, "label": "Financiamento", "amount": -2450, "type": "out"},
-        {"day": 18, "label": "Fatura — Platinum", "amount": -3210.4, "type": "out"},
-        {"day": 22, "label": "Fechamento cartão", "amount": 0, "type": "out"},
-        {"day": 26, "label": "Vencimento Gold", "amount": -432, "type": "out"},
-        {"day": 30, "label": "Poupança automática", "amount": -1500, "type": "out"},
+        {"day": 1, "label": "Academia", "amount": 159.9, "type": "expense"},
+        {"day": 3, "label": "Spotify", "amount": 34.9, "type": "expense"},
+        {"day": 5, "label": "Freelance", "amount": 3200, "type": "income"},
+        {"day": 7, "label": "Conta de luz", "amount": 218.75, "type": "expense"},
+        {"day": 10, "label": "Netflix", "amount": 55.9, "type": "expense"},
+        {"day": 11, "label": "Aluguel", "amount": 3200, "type": "expense"},
+        {"day": 14, "label": "Salário", "amount": 18500, "type": "income"},
+        {"day": 16, "label": "Financiamento", "amount": 2450, "type": "expense"},
+        {"day": 18, "label": "Fatura — Platinum", "amount": 3210.4, "type": "expense"},
+        {"day": 26, "label": "Vencimento Gold", "amount": 432, "type": "expense"},
+        {"day": 30, "label": "Poupança automática", "amount": 1500, "type": "expense"},
     ]
     return {"success": True, "data": data}

@@ -52,7 +52,7 @@ def get_credit_card_installments(db: Session = Depends(get_db)):
                 {
                     "description": tx.description,
                     "remaining_installments": remaining,
-                    "monthly_value": float(abs(tx.amount)),
+                    "monthly_value": float(tx.amount),
                     "next_due": next_due.strftime("%Y-%m-%d"),
                 }
             )
@@ -109,7 +109,6 @@ def list_cards(
             Transaction.status == "cleared",
         ).scalar() or Decimal("0.00")
 
-        current_bill = abs(current_bill)
         available = item.limit - current_bill
         utilization = Decimal("0.00")
         if item.limit > 0:
@@ -145,7 +144,7 @@ def get_card_spending_history(card_id: int, db: Session = Depends(get_db)):
     monthly_sums = defaultdict(Decimal)
     for tx in txs:
         date = tx.transaction_date
-        monthly_sums[(date.year, date.month)] += abs(tx.amount)
+        monthly_sums[(date.year, date.month)] += tx.amount
 
     months_keys = [(2025, 7), (2025, 6), (2025, 5), (2025, 4), (2025, 3), (2025, 2)]
 
@@ -186,7 +185,7 @@ def get_card_category_breakdown(card_id: int, db: Session = Depends(get_db)):
 
     data = []
     for name, color, total in results:
-        data.append({"name": name, "value": float(abs(total)), "color": color})
+        data.append({"name": name, "value": float(total), "color": color})
 
     if not data:
         if card_id == 1:
@@ -226,7 +225,7 @@ def get_card_biggest_purchases(card_id: int, db: Session = Depends(get_db)):
             Transaction.transaction_date >= start_date,
             Transaction.transaction_date <= end_date,
         )
-        .order_by(Transaction.amount)
+        .order_by(Transaction.amount.desc())
         .limit(5)
         .all()
     )
@@ -236,7 +235,7 @@ def get_card_biggest_purchases(card_id: int, db: Session = Depends(get_db)):
         data.append(
             {
                 "description": tx.description,
-                "amount": float(abs(tx.amount)),
+                "amount": float(tx.amount),
                 "date": tx.transaction_date.strftime("%d/%b"),
             }
         )

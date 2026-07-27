@@ -12,7 +12,7 @@ from app.modules.accounts.models import Account
 from app.modules.analytics import router, services
 from app.modules.assets.models import Asset
 from app.modules.budgets.models import Budget
-from app.modules.categories.models import Category
+from app.modules.categories.models import Category, Subcategory
 from app.modules.credit_cards.models import CreditCard
 from app.modules.investments.models import Investment
 from app.modules.loans.models import Loan
@@ -29,15 +29,17 @@ def add_transaction(
     *,
     status: str = "cleared",
     credit_card_id: int | None = None,
+    subcategory_id: int | None = None,
 ) -> Transaction:
     transaction = Transaction(
-        account_id=account_id,
+        account_id=None if credit_card_id is not None else account_id,
         category_id=category_id,
         amount=Decimal(amount),
         transaction_type=transaction_type,
         transaction_date=transaction_date,
         status=status,
         credit_card_id=credit_card_id,
+        subcategory_id=subcategory_id,
         description="Test",
     )
     db_session.add(transaction)
@@ -50,18 +52,18 @@ def test_overview_boundaries_statuses_and_normalized_amounts(db_session):
     category = Category(name="Casa", type="expense")
     db_session.add_all([account, category])
     db_session.commit()
-    add_transaction(db_session, account.id, category.id, "-100", "expense", datetime(2026, 2, 1))
+    add_transaction(db_session, account.id, category.id, "100", "expense", datetime(2026, 2, 1))
     add_transaction(db_session, account.id, category.id, "500", "income", datetime(2026, 2, 28, 23))
     add_transaction(
         db_session,
         account.id,
         category.id,
-        "-40",
+        "40",
         "expense",
         datetime(2026, 2, 10),
         status="scheduled",
     )
-    add_transaction(db_session, account.id, category.id, "-900", "expense", datetime(2026, 3, 1))
+    add_transaction(db_session, account.id, category.id, "900", "expense", datetime(2026, 3, 1))
     db_session.add(Budget(category_id=category.id, month=2, year=2026, planned_amount=300))
     db_session.commit()
 
@@ -82,7 +84,7 @@ def test_budget_status_includes_exceeded_and_unbudgeted(db_session):
     db_session.commit()
     db_session.add(Budget(category_id=food.id, month=7, year=2026, planned_amount=100))
     db_session.commit()
-    add_transaction(db_session, account.id, food.id, "-130", "expense", datetime(2026, 7, 2))
+    add_transaction(db_session, account.id, food.id, "130", "expense", datetime(2026, 7, 2))
     add_transaction(db_session, account.id, travel.id, "50", "expense", datetime(2026, 7, 3))
 
     result = services.get_budget_status(db_session, 7, 2026)
@@ -90,6 +92,70 @@ def test_budget_status_includes_exceeded_and_unbudgeted(db_session):
 
     assert states == {"Food": "exceeded", "Travel": "unbudgeted"}
     assert result.actual == 180
+
+
+def test_budget_status_filters_actual_by_category_or_subcategory(db_session):
+    account = Account(name="Conta filtro", type="checking", current_balance=0)
+    food = Category(name="Food filter", type="expense")
+    travel = Category(name="Travel filter", type="expense")
+    db_session.add_all([account, food, travel])
+    db_session.commit()
+    db_session.add_all(
+        [
+            Subcategory(name=f"Unused {index}", category_id=travel.id)
+            for index in range(3)
+        ]
+    )
+    db_session.commit()
+    groceries = Subcategory(name="Groceries", category_id=food.id)
+    restaurants = Subcategory(name="Restaurants", category_id=food.id)
+    db_session.add_all([groceries, restaurants])
+    db_session.add_all(
+        [
+            Budget(category_id=food.id, month=7, year=2026, planned_amount=300),
+            Budget(category_id=travel.id, month=7, year=2026, planned_amount=500),
+        ]
+    )
+    db_session.commit()
+    add_transaction(
+        db_session,
+        account.id,
+        food.id,
+        "80",
+        "expense",
+        datetime(2026, 7, 2),
+        subcategory_id=groceries.id,
+    )
+    add_transaction(
+        db_session,
+        account.id,
+        food.id,
+        "40",
+        "expense",
+        datetime(2026, 7, 3),
+        subcategory_id=restaurants.id,
+    )
+    add_transaction(
+        db_session,
+        account.id,
+        travel.id,
+        "200",
+        "expense",
+        datetime(2026, 7, 4),
+    )
+
+    by_category = services.get_budget_status(
+        db_session, 7, 2026, category=food.id
+    )
+    by_subcategory = services.get_budget_status(
+        db_session, 7, 2026, category=groceries.id
+    )
+
+    assert by_category.planned == 300
+    assert by_category.actual == 120
+    assert by_subcategory.planned == 300
+    assert by_subcategory.actual == 80
+    assert by_subcategory.categories[0].category_name == "Food filter"
 
 
 def test_credit_card_cycle_handles_february_and_end_of_month(db_session):
@@ -102,7 +168,7 @@ def test_credit_card_cycle_handles_february_and_end_of_month(db_session):
         db_session,
         account.id,
         category.id,
-        "-100",
+        "100",
         "expense",
         datetime(2026, 2, 28),
         credit_card_id=card.id,

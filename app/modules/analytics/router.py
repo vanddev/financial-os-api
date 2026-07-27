@@ -50,12 +50,15 @@ async def cash_flow(
 async def budget_status(
     month: int | None = Query(None, ge=1, le=12),
     year: int | None = Query(None, ge=1),
+    category: int | None = Query(None, ge=1),
     db: Session = Depends(get_db),
 ):
     selected_month, selected_year = _month_year(month, year)
     return {
         "success": True,
-        "data": services.get_budget_status(db, selected_month, selected_year),
+        "data": services.get_budget_status(
+            db, selected_month, selected_year, category=category
+        ),
     }
 
 

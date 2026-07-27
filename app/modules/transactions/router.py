@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.modules.transactions import schemas, service
 from app.modules.transactions.dto import TransactionDTO
-from app.shared.domain_enums import TransactionStatus
+from app.shared.domain_enums import CashFlowType, TransactionStatus
 from app.shared.pagination.paginator import PageResponse
 from app.shared.responses.api import SuccessResponse
 
@@ -21,6 +21,7 @@ def list_transactions(
     category_id: int | None = None,
     credit_card_id: int | None = None,
     status: TransactionStatus | None = None,
+    transaction_type: CashFlowType | None = None,
     description: str | None = None,
     min_amount: float | None = None,
     max_amount: float | None = None,
@@ -36,6 +37,7 @@ def list_transactions(
         "category_id": category_id,
         "credit_card_id": credit_card_id,
         "status": status,
+        "transaction_type": transaction_type,
         "description": description,
         "min_amount": min_amount,
         "max_amount": max_amount,
@@ -70,6 +72,11 @@ def create_transaction(
             status_code=status.HTTP_409_CONFLICT,
             detail="Idempotency-Key was already used with a different payload",
         ) from exc
+    except service.TransactionSourceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
     return {"success": True, "data": t}
 
 
@@ -85,7 +92,13 @@ def update_transaction(
     tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db)
 ):
     svc = service.TransactionService(db)
-    t = svc.update(tx_id, payload)
+    try:
+        t = svc.update(tx_id, payload)
+    except service.TransactionSourceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
     return {"success": True, "data": t}
 
 
