@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -40,13 +42,33 @@ def list_transactions(
         "end_date": end_date,
     }
     items, total = svc.list(page=page, page_size=page_size, filters=filters, sort=sort, order=order)
-    return {"success": True, "data": {"items": items, "page": page, "page_size": page_size, "total": total}}
+    return {
+        "success": True,
+        "data": {"items": items, "page": page, "page_size": page_size, "total": total},
+    }
 
 
 @router.post("/", response_model=SuccessResponse[TransactionDTO])
-def create_transaction(payload: schemas.TransactionCreate, db: Session = Depends(get_db)):
+def create_transaction(
+    payload: schemas.TransactionCreate,
+    idempotency_key: Annotated[
+        str,
+        Header(
+            alias="Idempotency-Key",
+            min_length=1,
+            max_length=255,
+        ),
+    ],
+    db: Session = Depends(get_db),
+):
     svc = service.TransactionService(db)
-    t = svc.create(payload)
+    try:
+        t = svc.create(payload, idempotency_key=idempotency_key)
+    except service.IdempotencyConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency-Key was already used with a different payload",
+        ) from exc
     return {"success": True, "data": t}
 
 
@@ -58,7 +80,9 @@ def get_transaction(tx_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{tx_id}", response_model=SuccessResponse[TransactionDTO])
-def update_transaction(tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db)):
+def update_transaction(
+    tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db)
+):
     svc = service.TransactionService(db)
     t = svc.update(tx_id, payload)
     return {"success": True, "data": t}

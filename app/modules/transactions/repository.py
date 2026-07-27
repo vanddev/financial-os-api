@@ -1,6 +1,5 @@
-from typing import List as _List, Tuple
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 
 from app.modules.transactions import models
 
@@ -10,7 +9,14 @@ class TransactionRepository:
         self.db = db
 
     def get(self, transaction_id: int) -> models.Transaction | None:
-        return self.db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
+        return self.db.scalar(
+            select(models.Transaction).where(models.Transaction.id == transaction_id)
+        )
+
+    def get_by_idempotency_key(self, idempotency_key: str) -> models.Transaction | None:
+        return self.db.scalar(
+            select(models.Transaction).where(models.Transaction.idempotency_key == idempotency_key)
+        )
 
     def list(
         self,
@@ -19,7 +25,7 @@ class TransactionRepository:
         filters: dict | None = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[_List[models.Transaction], int]:
+    ) -> tuple[list[models.Transaction], int]:
         q = self.db.query(models.Transaction)
         if filters:
             if filters.get("account_id"):
@@ -50,7 +56,11 @@ class TransactionRepository:
 
     def create(self, tx: models.Transaction) -> models.Transaction:
         self.db.add(tx)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
         self.db.refresh(tx)
         return tx
 

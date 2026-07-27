@@ -1,14 +1,38 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, JSON, Text
-from sqlalchemy.sql import func
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 
 
 class Transaction(Base):
     __tablename__ = "transactions"
+    __table_args__ = (
+        UniqueConstraint(
+            "idempotency_key",
+            name="uq_transactions_idempotency_key",
+        ),
+        CheckConstraint(
+            "(idempotency_key IS NULL AND request_hash IS NULL) OR "
+            "(idempotency_key IS NOT NULL AND request_hash IS NOT NULL)",
+            name="ck_transactions_idempotency_pair",
+        ),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
+    idempotency_key = Column(String(255), nullable=True)
+    request_hash = Column(String(64), nullable=True)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"), nullable=True)

@@ -59,7 +59,6 @@ class TransactionUpdate(BaseModel):
 
 class TransactionOut(TransactionBase):
     id: int
-    amount: float
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

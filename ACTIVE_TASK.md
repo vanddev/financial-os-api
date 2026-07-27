@@ -21,7 +21,7 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 
 <!-- INÍCIO DO QUADRO DE ESTADO -->
 
-### 📢 Estado Geral: `EM ANDAMENTO`
+### 📢 Estado Geral: `CONCLUÍDO`
 
 > [!IMPORTANT]
 > Uma varredura inicial revelou que a suíte de testes de integração está passando, porém existem pendências críticas de formatação (Ruff) e tipagem (MyPy) a serem resolvidas.
@@ -41,32 +41,38 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 ---
 
 ### 1. Tarefa Atual / Contexto
-*   **Solicitado por:** Preparação do Repositório (Discovery)
-*   **Descrição:** Correção de conformidade com Ruff (94 erros) e MyPy (68 erros de tipagem estática), mantendo todos os 8 testes existentes em execução com sucesso.
+*   **Solicitado por:** Proteção contra registros financeiros duplicados
+*   **Descrição:** Implementar `Idempotency-Key` no `POST /transactions/`.
 
 ### 2. Objetivo Geral
-*   [ ] Obter conformidade de 100% no Ruff (`ruff check` e `ruff format` limpos).
-*   [ ] Obter conformidade de 100% no MyPy (`mypy app/` sem erros de tipo).
-*   [ ] Garantir que 100% dos testes continuem passando (`pytest` 8/8 OK).
+*   [x] Exigir a chave no endpoint de criação.
+*   [x] Persistir chave e hash do payload com unicidade no banco.
+*   [x] Reutilizar a resposta da criação em retries equivalentes.
+*   [x] Rejeitar com `409` a mesma chave associada a payload diferente.
 
 ### 3. Status de Progresso
-*   [x] Mapear estado atual da base de código (Testes passando, linter e types falhando).
-*   [ ] Aplicar correções automáticas de importação e estilo com Ruff (`uv run ruff check --fix .` e `uv run ruff format .`).
-*   [ ] Corrigir erros de assinatura Pydantic manual (como uso incorreto de `cls` em validators do `app/modules/transactions/schemas.py`).
-*   [ ] Resolver as redefinições de nomes de rotas (como `monthly_flow` em `app/modules/cash_flow/router.py`).
-*   [ ] Corrigir tipos de anotação de funções inválidas no MyPy (como em `app/modules/categories/schemas.py`).
+*   [x] Mapear arquitetura e contratos existentes.
+*   [x] Implementar modelo, repository, service e router.
+*   [x] Criar e revisar migração Alembic.
+*   [x] Adicionar testes de integração HTTP.
+*   [x] Validar testes, Ruff e MyPy no escopo alterado.
 
 ### 4. Arquivos Modificados / Criados
-*Nenhum arquivo modificado ainda nesta tarefa.*
+* `app/modules/transactions/models.py`
+* `app/modules/transactions/repository.py`
+* `app/modules/transactions/service.py`
+* `app/modules/transactions/router.py`
+* `app/tests/test_transactions.py`
+* `alembic/versions/20260727_0000_add_transaction_idempotency.py`
 
 ### 5. Próximos Passos Imediatos
-1.  Rodar `uv run ruff check --fix .` para sanar a maior parte das quebras de ordenação de imports e formatação.
-2.  Rodar `uv run ruff format .` para formatar os arquivos.
-3.  Investigar os erros manuais apontados pelo MyPy nas schemas (especialmente os tipos inválidos e a anotação `Money` / `PositiveMoney`).
-4.  Resolver a redefinição de `monthly_flow` no roteador do fluxo de caixa.
+1. Aplicar `uv run alembic upgrade head` no banco do ambiente.
+2. Atualizar frontend e bot para enviar uma chave estável por operação.
 
 ### 6. Bloqueios e Problemas Conhecidos
-*   Não há bloqueios externos, todos os erros são locais e relacionados à estaticidade de código e formatação.
+* O worktree contém alterações anteriores da API analítica/MCP que devem ser preservadas.
+* Permanecem os débitos globais preexistentes: 111 erros Ruff e 73 erros MyPy.
+* Validação desta tarefa: 44 testes aprovados; Ruff e MyPy aprovados no escopo alterado.
 
 ### 7. Comandos para Retomada / Verificação
 ```bash
