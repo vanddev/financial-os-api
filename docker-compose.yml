@@ -1,30 +1,4 @@
 services:
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: financial-os-api
-  #   ports:
-  #     - "8000:8000"
-  #   environment:
-  #     - POSTGRES_HOST=postgres
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_DB=financial_os
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/financial_os
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - financial-os-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
 
   postgres:
     image: postgres:16-alpine
@@ -46,27 +20,9 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: financial-os-pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@financial-os.local
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_CONFIG_SERVER_MODE=False
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - financial-os-network
-    restart: unless-stopped
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-
 networks:
   financial-os-network:
     driver: bridge
 
 volumes:
   postgres_data:
-  pgadmin_data:
