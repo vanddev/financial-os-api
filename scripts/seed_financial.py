@@ -12,11 +12,14 @@ from decimal import Decimal
 from app.core.database import Base, SessionLocal, engine
 from app.modules.accounts import models as acc_models
 from app.modules.assets import models as asset_models
+from app.modules.budgets import models as budget_models
 from app.modules.categories import models as cat_models
 from app.modules.credit_cards import models as card_models
 from app.modules.goals import models as goal_models
 from app.modules.investments import models as inv_models
 from app.modules.loans import models as loan_models
+from app.modules.owners import models as owner_models
+from app.modules.settings import models as settings_models  # noqa: F401
 from app.modules.subscriptions import models as sub_models
 from app.modules.transactions import models as tx_models
 
@@ -28,6 +31,9 @@ def seed():
         # Clear existing data (simple, not cascade-safe for production)
         from sqlalchemy import text
 
+        db.execute(text("DELETE FROM owner_credit_cards"))
+        db.execute(text("DELETE FROM owner_accounts"))
+        db.execute(text("DELETE FROM owners"))
         db.execute(text("DELETE FROM transactions"))
         db.execute(text("DELETE FROM credit_cards"))
         db.execute(text("DELETE FROM investments"))
@@ -35,6 +41,7 @@ def seed():
         db.execute(text("DELETE FROM loans"))
         db.execute(text("DELETE FROM subscriptions"))
         db.execute(text("DELETE FROM goals"))
+        db.execute(text("DELETE FROM budgets"))
         db.execute(text("DELETE FROM subcategories"))
         db.execute(text("DELETE FROM categories"))
         db.execute(text("DELETE FROM accounts"))
@@ -89,6 +96,26 @@ def seed():
             c.subcategories = [cat_models.Subcategory(name=s) for s in subs]
             db.add(c)
             category_objs[name] = c
+        db.commit()
+
+        # ---------- Budgets ----------
+        budgets = [
+            ("Moradia", Decimal("4500.00")),
+            ("Alimentação", Decimal("2000.00")),
+            ("Transporte", Decimal("1200.00")),
+            ("Lazer", Decimal("800.00")),
+            ("Saúde", Decimal("900.00")),
+            ("Assinaturas", Decimal("350.00")),
+        ]
+        db.add_all(
+            budget_models.Budget(
+                category_id=category_objs[category_name].id,
+                month=7,
+                year=2026,
+                planned_amount=planned_amount,
+            )
+            for category_name, planned_amount in budgets
+        )
         db.commit()
 
         # ---------- Accounts ----------
@@ -159,13 +186,33 @@ def seed():
         db.add_all([cc1, cc2])
         db.commit()
 
+        # ---------- Owner ----------
+        owner_phone = "7197038298"
+        owner = owner_models.Owner(phone=owner_phone)
+        owner.account_links = [
+            owner_models.OwnerAccount(
+                account_id=account.id,
+                is_default=name == "Conta Corrente",
+            )
+            for name, account in account_objs.items()
+        ]
+        owner.credit_card_links = [
+            owner_models.OwnerCreditCard(
+                credit_card_id=card.id,
+                is_default=card.name == "Cartão Platinum",
+            )
+            for card in (cc1, cc2)
+        ]
+        db.add(owner)
+        db.commit()
+
         # ---------- Subscriptions ----------
         subs = [
             (
                 "Netflix",
                 "Streaming",
                 Decimal("55.90"),
-                datetime(2025, 7, 24),
+                datetime(2026, 7, 24),
                 "Cartão Platinum",
                 True,
             ),
@@ -173,7 +220,7 @@ def seed():
                 "Spotify Família",
                 "Música",
                 Decimal("34.90"),
-                datetime(2025, 7, 28),
+                datetime(2026, 7, 28),
                 "Cartão Gold",
                 True,
             ),
@@ -181,7 +228,7 @@ def seed():
                 "Amazon Prime",
                 "Streaming",
                 Decimal("14.90"),
-                datetime(2025, 8, 3),
+                datetime(2026, 8, 3),
                 "Cartão Platinum",
                 True,
             ),
@@ -189,7 +236,7 @@ def seed():
                 "ChatGPT Plus",
                 "Software",
                 Decimal("110.00"),
-                datetime(2025, 8, 6),
+                datetime(2026, 8, 6),
                 "Cartão Platinum",
                 True,
             ),
@@ -197,7 +244,7 @@ def seed():
                 "Xbox Game Pass",
                 "Games",
                 Decimal("44.90"),
-                datetime(2025, 8, 12),
+                datetime(2026, 8, 12),
                 "Cartão Gold",
                 False,
             ),
@@ -205,7 +252,7 @@ def seed():
                 "iCloud 200GB",
                 "Armazenamento",
                 Decimal("12.90"),
-                datetime(2025, 8, 15),
+                datetime(2026, 8, 15),
                 "Cartão Platinum",
                 True,
             ),
@@ -213,7 +260,7 @@ def seed():
                 "Notion",
                 "Software",
                 Decimal("42.00"),
-                datetime(2025, 8, 19),
+                datetime(2026, 8, 19),
                 "Cartão Platinum",
                 True,
             ),
@@ -236,7 +283,7 @@ def seed():
                 "Reserva de Emergência",
                 Decimal("45000.00"),
                 Decimal("32000.00"),
-                datetime(2025, 12, 31),
+                datetime(2026, 12, 31),
                 False,
             ),
             (
@@ -250,7 +297,7 @@ def seed():
                 "Computador Novo",
                 Decimal("12000.00"),
                 Decimal("6800.00"),
-                datetime(2025, 9, 30),
+                datetime(2026, 9, 30),
                 False,
             ),
             (
@@ -404,7 +451,7 @@ def seed():
                 "income",
                 "bank_transfer",
                 "cleared",
-                datetime(2025, 7, 14),
+                datetime(2026, 7, 14),
             ),
             (
                 "Conta Corrente",
@@ -415,7 +462,7 @@ def seed():
                 "expense",
                 "debit_card",
                 "cleared",
-                datetime(2025, 7, 14),
+                datetime(2026, 7, 14),
             ),
             (
                 "Conta Corrente",
@@ -426,7 +473,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 13),
+                datetime(2026, 7, 13),
                 1,
                 1,
                 None,
@@ -441,7 +488,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 12),
+                datetime(2026, 7, 12),
                 1,
                 6,
                 3,
@@ -456,7 +503,7 @@ def seed():
                 "expense",
                 "bank_transfer",
                 "cleared",
-                datetime(2025, 7, 11),
+                datetime(2026, 7, 11),
             ),
             (
                 "Conta Corrente",
@@ -467,7 +514,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 10),
+                datetime(2026, 7, 10),
                 1,
                 1,
                 1,
@@ -482,7 +529,7 @@ def seed():
                 "income",
                 "bank_transfer",
                 "cleared",
-                datetime(2025, 7, 9),
+                datetime(2026, 7, 9),
             ),
             (
                 "Conta Corrente",
@@ -493,7 +540,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 8),
+                datetime(2026, 7, 8),
                 1,
                 1,
                 1,
@@ -508,7 +555,7 @@ def seed():
                 "expense",
                 "automatic_debit",
                 "cleared",
-                datetime(2025, 7, 7),
+                datetime(2026, 7, 7),
             ),
             (
                 "Conta Corrente",
@@ -519,7 +566,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 6),
+                datetime(2026, 7, 6),
                 1,
                 1,
                 1,
@@ -534,7 +581,7 @@ def seed():
                 "income",
                 "bank_transfer",
                 "cleared",
-                datetime(2025, 7, 5),
+                datetime(2026, 7, 5),
             ),
             (
                 "Conta Corrente",
@@ -545,7 +592,7 @@ def seed():
                 "expense",
                 "debit_card",
                 "cleared",
-                datetime(2025, 7, 4),
+                datetime(2026, 7, 4),
             ),
             (
                 "Conta Corrente",
@@ -556,7 +603,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 3),
+                datetime(2026, 7, 3),
                 1,
                 1,
                 1,
@@ -571,7 +618,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 2),
+                datetime(2026, 7, 2),
                 2,
                 10,
                 2,
@@ -586,7 +633,7 @@ def seed():
                 "expense",
                 "credit_card",
                 "cleared",
-                datetime(2025, 7, 1),
+                datetime(2026, 7, 1),
                 1,
                 1,
                 1,
@@ -601,7 +648,7 @@ def seed():
                 "expense",
                 "bank_transfer",
                 "scheduled",
-                datetime(2025, 7, 16),
+                datetime(2026, 7, 16),
             ),
             (
                 "Conta Corrente",
@@ -612,7 +659,7 @@ def seed():
                 "expense",
                 "bank_transfer",
                 "scheduled",
-                datetime(2025, 7, 18),
+                datetime(2026, 7, 18),
             ),
         ]
 

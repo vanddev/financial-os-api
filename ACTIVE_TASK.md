@@ -21,10 +21,12 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 
 <!-- INÍCIO DO QUADRO DE ESTADO -->
 
-### 📢 Estado Geral: `CONCLUÍDO`
+### 📢 Estado Geral: `PLANO PRONTO`
 
 > [!IMPORTANT]
-> Uma varredura inicial revelou que a suíte de testes de integração está passando, porém existem pendências críticas de formatação (Ruff) e tipagem (MyPy) a serem resolvidas.
+> Demanda ativa `FOS-2026-07-29-DATA-2026`: o refinamento restringiu a entrega
+> exclusivamente a `scripts/seed_financial.py`. O banco será reconstruído pelo
+> usuário; banco, migrações, fixtures e testes não podem ser alterados.
 
 ### Incidente concluído: serialização de transações
 *   **Problema:** `POST /transactions/` e `PUT /transactions/{tx_id}` retornavam erro 500 ao serializar uma instância ORM de `Transaction`.
@@ -41,52 +43,62 @@ Este arquivo é o quadro de estado ativo do repositório. Ele serve para registr
 ---
 
 ### 1. Tarefa Atual / Contexto
-*   **Solicitado por:** Remoção de cores dos domínios
-*   **Descrição:** Remover `color` de persistência, contratos, seeds e respostas; apresentação fica no frontend.
+*   **Solicitado por:** usuário
+*   **Descrição original:** “atualize todos os dados do banco de dados para
+    2026 para evitar problemas nos testes”
+*   **Refinamento:** somente `scripts/seed_financial.py`; converter anos 2025 e
+    2027 para 2026 preservando mês/dia/horário e demais dados.
+*   **Fase:** PLANNING concluído; T-01 está `ready` para PLAN_REVIEW.
 
 ### 2. Objetivo Geral
-*   [x] Remover colunas de accounts, categories e goals.
-*   [x] Remover campos de schemas, DTOs e serviços.
-*   [x] Remover cores de respostas analíticas.
-*   [x] Atualizar seeds e testes.
-*   [x] Criar e revisar migração reversível.
+*   [x] Restringir produto exclusivamente ao seed.
+*   [x] Confirmar conversão mecânica de 2025/2027 para 2026.
+*   [ ] Atualizar apenas chamadas `datetime(...)` do seed.
+*   [ ] Validar por AST, compilação, Ruff e revisão do diff.
+*   [ ] Registrar evidência; o usuário reconstruirá o banco depois.
 
 ### 3. Status de Progresso
-*   [x] Mapear todas as ocorrências.
-*   [x] Remover campos persistidos e públicos.
-*   [x] Confirmar ausência no OpenAPI e metadata.
-*   [x] Validar migração offline e cabeça única.
-*   [x] Executar testes direcionados e Ruff.
+*   [x] Ler fluxo multiagente, perfil de Product Manager, templates e skill do projeto.
+*   [x] Confirmar ausência de `handoff.md` anterior.
+*   [x] Mapear datas no seed, modelos, routers e testes.
+*   [x] Coletar baseline de 65 testes com cache `uv` em `/tmp`.
+*   [x] Criar contrato completo em `handoff.md`.
+*   [x] Incorporar refinamento e resolver bloqueios materiais.
+*   [x] Reduzir o plano a uma única tarefa sem sobreposição.
+*   [ ] Orquestrador mover T-01 de `ready` para `in_progress`.
 
 ### 4. Arquivos Modificados / Criados
-* `app/modules/accounts`, `categories` e `goals`
-* `app/modules/dashboard`, `credit_cards` e `investments`
-* `scripts/seed_financial.py`
-* `app/tests/test_no_domain_colors.py` e testes afetados
-* `alembic/versions/20260727_0500_remove_domain_colors.py`
+* `handoff.md` — criado e refinado, ID `FOS-2026-07-29-DATA-2026`.
+* `ACTIVE_TASK.md` — atualizado para o plano pronto.
+* Nenhum código, teste, seed, migração ou banco foi alterado nesta fase.
 
 ### 5. Próximos Passos Imediatos
-1. Aplicar `uv run alembic upgrade head` no banco do ambiente.
-2. Atualizar o frontend para resolver todas as cores localmente.
+1. Orquestrador executar PLAN_REVIEW e atribuir T-01.
+2. Developer alterar somente `scripts/seed_financial.py`.
+3. Developer registrar `evidence/T-01.md` e validações somente leitura.
+4. Orquestrador aceitar; usuário reconstruirá o banco fora da entrega.
 
 ### 6. Bloqueios e Problemas Conhecidos
-* O worktree contém alterações anteriores da API analítica/MCP que devem ser preservadas.
-* Permanecem os débitos globais preexistentes: 111 erros Ruff e 73 erros MyPy.
-* Validação desta tarefa: 12 testes direcionados aprovados e Ruff limpo nos arquivos alterados.
-* A suíte completa parou em testes `TestClient` não relacionados; a execução isolada também travou.
-* MyPy ampliado mantém 22 erros legados de schemas monetários/SQLAlchemy, nenhum ligado a `color`.
-* Permanecem erros MyPy preexistentes nos schemas monetários legados.
+* Nenhum bloqueio de contrato permanece.
+* O seed atual apaga várias tabelas; sua execução está fora da entrega.
+* Datas 2025/2027 devem mudar apenas no primeiro argumento de `datetime(...)`.
+* Ocorrências de ano em nomes/textos e fora do seed não pertencem ao escopo.
+* O worktree contém alterações anteriores em `AGENTS.md`, `app/core/config.py`
+  e `.agents/`, que devem ser preservadas.
 
 ### 7. Comandos para Retomada / Verificação
 ```bash
-# Executar testes unitários
-uv run pytest
-
-# Executar linter Ruff
-uv run ruff check .
-
-# Executar MyPy typecheck
-uv run mypy app/
+rg -n 'datetime\((2025|2027),' scripts/seed_financial.py
+UV_CACHE_DIR=/tmp/financial-os-uv-cache uv run python -m py_compile scripts/seed_financial.py
+UV_CACHE_DIR=/tmp/financial-os-uv-cache uv run ruff check scripts/seed_financial.py
 ```
+
+### 8. Histórico relevante preservado
+* A demanda anterior de remoção de cores foi registrada como concluída neste
+  quadro: campos removidos de accounts/categories/goals/credit_cards, seed e
+  testes atualizados, com migrações reversíveis.
+* Na entrega anterior foram registrados débitos globais preexistentes de Ruff e
+  MyPy e alterações analíticas/MCP no worktree; eles não pertencem à demanda
+  temporal atual.
 
 <!-- FIM DO QUADRO DE ESTADO -->
