@@ -99,3 +99,32 @@ Se você precisar trabalhar em paralelo com outros agentes ou se sua janela de c
 
 1.  **Instruções de Coordenação Multiagente:** Consulte o arquivo [MULTIAGENT.md](file:///var/home/vand/dev/financial-os-api/MULTIAGENT.md) para entender como dividir tarefas entre subagentes especialistas e evitar conflitos de código.
 2.  **Acompanhamento de Estado e Progresso:** Consulte e mantenha atualizado o arquivo [ACTIVE_TASK.md](file:///var/home/vand/dev/financial-os-api/ACTIVE_TASK.md). Este arquivo mantém o progresso atual, pendências, arquivos alterados e passos imediatos para que o próximo agente possa retomar o trabalho de forma instantânea sem perda de contexto.
+
+
+## Aprovação obrigatória
+
+  - Não modifique arquivos sem apresentar previamente o plano ou diff proposto.
+  - Aguarde aprovação explícita antes de aplicar qualquer alteração.
+  - Comandos somente leitura podem ser executados sem aprovação.
+  - Não execute migrations nem altere bancos sem aprovação explícita.
+
+<!-- ## Agent Delivery Workflow
+
+Demandas de implementação coordenadas por múltiplos agentes devem seguir
+`.agents/README.md`. O fluxo obrigatório separa planejamento e execução:
+
+1. o Orquestrador encaminha a demanda, sem reinterpretá-la, ao Product Manager;
+2. o Product Manager inspeciona o repositório e produz ou atualiza
+   `handoff.md`, mas não implementa a feature;
+3. o Orquestrador só libera tarefas cujo contrato de execução esteja completo;
+4. o Developer implementa código e testes dentro da responsabilidade de
+   arquivos definida e registra evidências e decisões;
+5. o Orquestrador encerra a demanda somente quando aceite, testes e evidências
+   forem rastreáveis.
+
+Os perfis ficam em `.agents/profiles/`. O contrato mínimo de uma tarefa inclui
+objetivo, escopo e fora de escopo, dependências, responsabilidade exclusiva ou
+compartilhada de arquivos, critérios de aceite, cenários de teste, paralelismo,
+comandos de verificação e local das evidências. Use
+`.agents/templates/handoff.template.md` para novos planejamentos e
+`.agents/templates/task-evidence.template.md` para cada entrega. -->
