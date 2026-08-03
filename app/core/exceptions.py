@@ -49,6 +49,18 @@ def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
 
 
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, BaseException):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_json_safe(item) for item in value]
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    return str(value)
+
+
 def error_response(
     request: Request,
     *,
@@ -110,22 +122,33 @@ async def validation_exception_handler(
 ) -> JSONResponse:
     errors = exc.errors()
     invalid_json = any(error.get("type") == "json_invalid" for error in errors)
+    invalid_body = any(
+        (location := error.get("loc")) and location[0] == "body" for error in errors
+    )
     status_code = (
-        status.HTTP_400_BAD_REQUEST if invalid_json else status.HTTP_422_UNPROCESSABLE_ENTITY
+        status.HTTP_400_BAD_REQUEST
+        if invalid_json or invalid_body
+        else status.HTTP_422_UNPROCESSABLE_ENTITY
     )
     details = [
         {
             "field": ".".join(str(part) for part in error.get("loc", ())) or None,
             "message": error.get("msg", "Invalid value"),
             "type": error.get("type"),
-            "context": error.get("ctx"),
+            "context": _json_safe(error.get("ctx")),
         }
         for error in errors
     ]
     return error_response(
         request,
         status_code=status_code,
-        code="invalid_json" if invalid_json else "validation_error",
+        code=(
+            "invalid_json"
+            if invalid_json
+            else "bad_request"
+            if invalid_body
+            else "validation_error"
+        ),
         message="Malformed JSON body" if invalid_json else "Request validation failed",
         details=details,
     )

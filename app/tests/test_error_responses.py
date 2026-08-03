@@ -78,11 +78,39 @@ def test_not_found_validation_and_malformed_json_are_standardized() -> None:
 
     assert not_found.status_code == 404
     assert not_found.json()["code"] == "not_found"
-    assert validation.status_code == 422
-    assert validation.json()["code"] == "validation_error"
+    assert validation.status_code == 400
+    assert validation.json()["code"] == "bad_request"
     assert validation.json()["details"][0]["field"] == "body.amount"
     assert malformed.status_code == 400
     assert malformed.json()["code"] == "invalid_json"
+
+
+def test_transaction_source_validation_returns_serializable_bad_request() -> None:
+    client = TestClient(app, raise_server_exceptions=False)
+
+    response = client.post(
+        "/transactions/",
+        headers={"Idempotency-Key": "invalid-transaction-source"},
+        json={
+            "account_id": 0,
+            "category_id": 2,
+            "credit_card_id": 1,
+            "amount": 15,
+            "transaction_type": "expense",
+            "payment_method": "cash",
+            "transaction_date": "2026-07-29T19:06:09.461Z",
+        },
+    )
+
+    assert response.status_code == 400
+    body = response.json()
+    assert body["code"] == "bad_request"
+    assert body["message"] == "Request validation failed"
+    assert body["details"][0]["field"] == "body"
+    assert (
+        body["details"][0]["context"]["error"]
+        == "account_id and credit_card_id cannot be provided together"
+    )
 
 
 def test_internal_error_hides_sensitive_details() -> None:

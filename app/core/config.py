@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     CORS_ALLOWED_ORIGINS: list[str] = [
+        "http://localhost:8081",
         "http://localhost:8080",
         "http://localhost:3000",
         "http://127.0.0.1:8080",
