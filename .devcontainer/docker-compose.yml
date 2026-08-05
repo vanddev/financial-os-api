@@ -1,0 +1,30 @@
+services:
+  api-dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    environment:
+      APP_NAME: Financial OS API
+      APP_VERSION: 1.0.0
+      ENVIRONMENT: development
+      DEBUG: "true"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: financial_os
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      LOG_LEVEL: INFO
+    volumes:
+      - .:/workspace:cached
+      - financial_os_venv:/workspace/.venv
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - financial-os-network
+    init: true
+
+volumes:
+  financial_os_venv:

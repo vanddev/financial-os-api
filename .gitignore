@@ -37,9 +37,6 @@ env/
 .env
 .env.local
 
-# UV
-uv.lock
-
 # Database
 *.db
 *.sqlite
