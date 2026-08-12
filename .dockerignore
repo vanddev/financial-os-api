@@ -1,0 +1,17 @@
+.git
+.github
+.agents
+.devcontainer
+.venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+__pycache__
+*.py[cod]
+*.log
+.env
+.env.*
+htmlcov
+.coverage
+app/tests
+

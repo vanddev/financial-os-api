@@ -1,8 +1,9 @@
 services:
-  api-dev:
+  api:
     build:
       context: .
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: Dockerfile
+      target: development
     environment:
       APP_NAME: Financial OS API
       APP_VERSION: 1.0.0
@@ -28,3 +29,6 @@ services:
 
 volumes:
   financial_os_venv:
+  financial-os-network:
+    name: financial-os-dev
+    external: true

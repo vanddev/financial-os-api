@@ -127,6 +127,109 @@ docker compose up postgres pgadmin
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+## Production Deployment
+
+The workflow `.github/workflows/publish-image.yml` builds the `production` stage from
+the `Dockerfile` and publishes it to GitHub Container Registry (GHCR):
+
+```text
+ghcr.io/<github-owner>/financial-os-api:latest
+ghcr.io/<github-owner>/financial-os-api:v1.0.0
+ghcr.io/<github-owner>/financial-os-api:sha-<commit>
+```
+
+Pushes to `main` publish `latest` and a commit tag. Tags matching `v*` also publish
+the corresponding version. The workflow can also be started manually from GitHub Actions.
+
+### Configure the VPS
+
+Copy `compose.production.yml` to the VPS and create a `.env` file in the same directory:
+
+```bash
+GHCR_IMAGE=ghcr.io/<github-owner>/financial-os-api
+IMAGE_TAG=v1.0.0
+
+APP_NAME=Financial OS API
+APP_VERSION=1.0.0
+ENVIRONMENT=production
+DEBUG=false
+LOG_LEVEL=INFO
+
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=financial_os
+POSTGRES_USER=financial_os
+POSTGRES_PASSWORD=<strong-password>
+```
+
+Keep this `.env` file only on the VPS and do not commit production credentials. Prefer an
+immutable version such as `v1.0.0` or `sha-<commit>` for `IMAGE_TAG` instead of `latest`.
+
+If the GHCR package is private, create a GitHub personal access token with `read:packages`
+and authenticate Docker on the VPS once:
+
+```bash
+echo "$GHCR_TOKEN" | docker login ghcr.io \
+  --username <github-user> \
+  --password-stdin
+```
+
+Public GHCR packages can be pulled without authentication.
+
+### Recommended production publication order
+
+1. Run the application checks locally:
+
+```bash
+uv run ruff check .
+uv run mypy app/
+uv run pytest
+```
+
+2. Commit the release and create a version tag:
+
+```bash
+git add .
+git commit -m "chore: release v1.0.0"
+git tag v1.0.0
+git push origin main
+git push origin v1.0.0
+```
+
+3. Wait for the `Publish container image` workflow to complete successfully in GitHub
+Actions.
+
+4. On the VPS, set `IMAGE_TAG` in `.env` to the published version and download the image:
+
+```bash
+docker compose -f compose.production.yml pull
+```
+
+5. Apply database migrations using the new image:
+
+```bash
+docker compose -f compose.production.yml run --rm api \
+  uv run --no-sync alembic upgrade head
+```
+
+6. Start or replace the application containers:
+
+```bash
+docker compose -f compose.production.yml up -d
+```
+
+7. Verify container status, logs, and the health endpoint:
+
+```bash
+docker compose -f compose.production.yml ps
+docker compose -f compose.production.yml logs --tail=100 api
+curl --fail http://127.0.0.1:8000/health
+```
+
+To roll back the application image, restore the previous `IMAGE_TAG`, then repeat `pull`
+and `up -d`. Database rollback must be evaluated separately before running any Alembic
+downgrade.
+
 ## Database Migrations
 
 ### Create a new migration

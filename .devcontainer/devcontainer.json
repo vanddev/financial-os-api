@@ -4,26 +4,21 @@
     "../docker-compose.yml",
     "docker-compose.yml"
   ],
-  "service": "api-dev",
+  "service": "api",
   "runServices": [
     "postgres",
-    "api-dev"
+    "api"
   ],
   "workspaceFolder": "/workspace",
   "overrideCommand": false,
   "shutdownAction": "stopCompose",
   "forwardPorts": [
-    8000,
-    5432
+    8000
   ],
   "portsAttributes": {
     "8000": {
       "label": "Financial OS API",
       "onAutoForward": "notify"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
     }
   },
   "customizations": {

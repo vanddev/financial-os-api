@@ -15,14 +15,15 @@ services:
       - financial-os-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
 networks:
   financial-os-network:
-    driver: bridge
+    external: true
+    name: financial-os-dev
 
 volumes:
   postgres_data:
