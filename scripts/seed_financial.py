@@ -25,7 +25,6 @@ from app.modules.transactions import models as tx_models
 
 
 def seed():
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         # Clear existing data (simple, not cascade-safe for production)
